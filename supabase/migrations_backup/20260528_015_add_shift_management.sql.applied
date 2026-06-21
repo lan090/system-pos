@@ -1,0 +1,28 @@
+-- Migration: Add Shift Management (Issue 2.8)
+-- Introduces a daily cash shift ledger to ensure strict financial reconciliation
+
+CREATE TABLE cash_shifts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    cashier_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    start_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    end_time TIMESTAMPTZ,
+    starting_cash NUMERIC(12,2) NOT NULL DEFAULT 0.00,
+    expected_cash NUMERIC(12,2) NOT NULL DEFAULT 0.00,
+    actual_cash NUMERIC(12,2),
+    status VARCHAR(20) NOT NULL DEFAULT 'Open' CONSTRAINT chk_shift_status CHECK (status IN ('Open', 'Closed'))
+);
+
+-- Enable RLS on cash_shifts
+ALTER TABLE cash_shifts ENABLE ROW LEVEL SECURITY;
+
+-- Allow cashiers to manage their own shifts and managers to see all
+CREATE POLICY "Cashiers can manage their shifts" 
+ON cash_shifts FOR ALL TO authenticated 
+USING (cashier_id = auth.uid() OR get_current_user_role() = 'Owner/Manager');
+
+-- Link transactions to their respective shift
+ALTER TABLE transactions 
+ADD COLUMN shift_id UUID REFERENCES cash_shifts(id) ON DELETE RESTRICT;
+
+-- Index for quickly finding active shifts
+CREATE INDEX idx_cash_shifts_active ON cash_shifts (cashier_id, status) WHERE status = 'Open';

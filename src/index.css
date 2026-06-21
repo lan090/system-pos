@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-background: #FDF9FA;
+  --color-surface: #FFFFFF;
+  --color-primary: #6B3A44;
+  --color-secondary: #D98897;
+  --color-accent: #C5A880;
+  --color-success: #4F8A6B;
+  --color-warning: #D4A15A;
+  --color-danger: #C85C5C;
+  --color-border: #F5E1E4;
+
+  --color-on-background: #6B3A44;
+  --color-surface-dim: #FAF3F4;
+  --color-error: #C85C5C;
+  --color-tertiary: #C5A880;
+  
+  --shadow-premium-sm: 0 2px 8px rgba(107, 58, 68, 0.02);
+  --shadow-premium-md: 0 8px 24px rgba(107, 58, 68, 0.04), 0 2px 4px rgba(107, 58, 68, 0.02);
+  --shadow-premium-lg: 0 16px 40px rgba(107, 58, 68, 0.06), 0 4px 12px rgba(107, 58, 68, 0.03);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d7c1c4;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #cd8e99;
+}
+
+.shadow-plum {
+  box-shadow: 0 4px 12px rgba(107, 58, 68, 0.06);
+}
+
+.shadow-wellness {
+  box-shadow: 0 4px 12px rgba(107, 58, 68, 0.06);
+}
+
+/* =========================================================================
+   THERMAL PRINTING OPTIMIZATION (Audit 2.11)
+   Membatasi lebar kertas 58mm dan menyembunyikan UI yang tidak relevan
+   ========================================================================= */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #thermal-receipt-target, #thermal-receipt-target * {
+    visibility: visible;
+  }
+  #thermal-receipt-target {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 58mm; /* Optimasi ukuran kertas thermal standar salon */
+    max-width: 58mm;
+    padding: 0;
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace; /* Memastikan font rata kanan-kiri presisi */
+    font-size: 12px;
+  }
+  @page {
+    size: auto;
+    margin: 0mm; /* Menghilangkan header/footer default browser seperti tanggal & URL */
+  }
+  .no-print {
+    display: none !important;
+  }
+}

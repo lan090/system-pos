@@ -1,0 +1,19 @@
+# FSRMS Frontend Audit Report (Phase 1-4)
+
+Berdasarkan hasil analisis terhadap `src/App.tsx` dan `src/components/POSTerminalView.tsx`, berikut adalah temuan audit teknis arsitektur frontend dengan fokus pada manajemen *state*, *offline sync*, UI/UX, dan performa React.
+
+## Ringkasan Temuan Audit
+
+| Fase | Isu Teknis (Target Baris Kode) | Severity | Solusi Patch |
+|:---|:---|:---|:---|
+| **PHASE 1** (Offline Sync) | **Kegagalan Sinkronisasi Transaksi Dibuang ke Karantina tanpa UI**<br/>`App.tsx` (Baris 540-545): Saat `txErr` terjadi, transaksi dilempar ke `saveQuarantinedTransaction(tx)` lalu dihapus dari IndexedDB utama, tapi tidak ada UI bagi user untuk melihat/meresolusi karantina ini. Data bisa menggantung tanpa sepengetahuan kasir. | **HIGH** | Buat komponen UI `QuarantineManager.tsx` dan rutekan notifikasi ke layar. Jangan hapus dari queue utama sebelum di-_resolve_ manual oleh admin. |
+| **PHASE 1** (Offline Sync) | **Duplikasi Logika Bisnis & Desync Membership Tier**<br/>`App.tsx` (Baris 521-526): Logika kenaikan pangkat pelanggan (*Platinum/Gold*) di-_hardcode_ ulang di frontend menggunakan operator lawas `OR`, sementara *trigger database* (016) sudah menggunakan `AND`. | **HIGH** | Hapus logika kalkulasi tier manual di frontend (`App.tsx` baris 512-538). Ganti dengan melakukan _fetch_ ulang profil pelanggan dari tabel Supabase setelah sinkronisasi berhasil. |
+| **PHASE 2** (Architecture) | **Global State Chaos (Prop Drilling Ekstrem)**<br/>`App.tsx` (Baris 68-250): Menyimpan seluruh data operasional raksasa (`treatments`, `customers`, `appointments`, `cart` global) dalam state komponen dasar `App`. Setiap mutasi kecil me-_re-render_ keseluruhan pohon DOM. | **HIGH** | Pisahkan *global state* menjadi React Context khusus (e.g., `POSContext`, `CustomerContext`) atau gunakan state manager atomik (Zustand/Redux Toolkit) agar hanya komponen yang berlangganan yang mengalami *re-render*. |
+| **PHASE 3** (UI/UX) | **Missing API Crash Feedback pada Checkout**<br/>`POSTerminalView.tsx` (Fungsi `handleCheckout` & UI): Jika API *checkout* melempar exception berat selain fallback, *error* hanya ditangkap oleh `console.error` tanpa `Toast` atau peringatan visual di terminal kasir. Kasir bisa mengira transaksi sukses. | **MEDIUM** | Tambahkan *state* `checkoutError` dan bungkus dengan komponen *Toast/Snackbar Alert* merah yang memblokir layar sampai kasir menyadarinya. |
+| **PHASE 3** (UI/UX) | **Empty State Keranjang Kasir Kurang Informatif**<br/>`POSTerminalView.tsx` (Baris 189 & blok UI Keranjang): Saat `cart.length === 0`, tombol Checkout mati tapi UI keranjang tidak memberikan indikator aksi (CTA) yang mendidik selain kekosongan visual. | **LOW** | Tambahkan ilustrasi *empty state* yang interaktif (misal: "Keranjang masih kosong, silakan klik katalog layanan di sebelah kiri untuk memulai transaksi"). |
+| **PHASE 4** (Engineering) | **Re-render O(N) akibat Fungsi Inline yang Bocor**<br/>`POSTerminalView.tsx` (Baris 192 & 205): Fungsi mutasi inti `addToCart` dan `removeFromCart` tidak dibungkus oleh `useCallback`. Ini membuat referensi memori baru setiap kali *parent* re-render, memicu evaluasi ulang pada ribuan item katalog potensial. | **MEDIUM** | Bungkus deklarasi `addToCart`, `removeFromCart`, dan fungsi kalkulasi berat `handleCheckout` dengan `useCallback` dan _dependency array_ yang ketat. |
+| **PHASE 4** (Engineering) | **Memory Leak Potensial pada Active Ping (useEffect)**<br/>`App.tsx` (Baris 45-64): Hook *ping* konektivitas menggunakan `setTimeout` dan `AbortController`, namun tidak ada mekanisme *cleanup* mutlak jika komponen unmount secara paksa (walaupun saat ini `App` selalu *mount*). | **LOW** | Pastikan hook `useAuth` yang memanggil `checkActualConnectivity` memiliki `return () => controller.abort()` di dalam blok `useEffect` miliknya. |
+
+---
+
+*Laporan digenerate secara otomatis berdasarkan instruksi Audit Frontend Fase 1-4.*

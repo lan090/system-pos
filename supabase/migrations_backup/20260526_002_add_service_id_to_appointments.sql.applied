@@ -1,0 +1,114 @@
+-- =========================================================================
+-- MIGRATION: 20260526_002_add_service_id_to_appointments
+-- Issue Fix: Audit Critical Finding 3.1 & 3.2 — service_id & overlap checking
+-- =========================================================================
+
+BEGIN;
+
+-- -------------------------------------------------------------------------
+-- STEP 1: Add duration_minutes to services table (default 60 minutes)
+-- -------------------------------------------------------------------------
+ALTER TABLE services
+    ADD COLUMN IF NOT EXISTS duration_minutes INTEGER NOT NULL DEFAULT 60 CONSTRAINT chk_positive_duration CHECK (duration_minutes > 0);
+
+-- -------------------------------------------------------------------------
+-- STEP 2: Create a placeholder service for legacy data preservation
+-- -------------------------------------------------------------------------
+INSERT INTO services (id, nama_layanan, harga_jual, kategori, duration_minutes, description, available_offline)
+VALUES (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    'Legacy Unknown Service',
+    1.00, -- Placeholder minimal positive price to satisfy constraint
+    'Legacy',
+    60,
+    'System placeholder for historical appointments created before service_id tracking was introduced.',
+    FALSE
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- -------------------------------------------------------------------------
+-- STEP 3: Create a reusable system guest customer for Walk-In bookings
+-- -------------------------------------------------------------------------
+INSERT INTO customers (id, nama_lengkap, nomor_telepon, membership_tier, total_omset, total_kunjungan)
+VALUES (
+    'c0000000-0000-0000-0000-000000000000'::uuid,
+    'Walk-In Guest',
+    '0000000000', -- Unique placeholder matching check constraint
+    'Silver',
+    0.00,
+    0
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- -------------------------------------------------------------------------
+-- STEP 4: Add service_id column referencing services(id)
+-- -------------------------------------------------------------------------
+ALTER TABLE appointments
+    ADD COLUMN IF NOT EXISTS service_id UUID NULL REFERENCES services(id) ON DELETE RESTRICT;
+
+-- -------------------------------------------------------------------------
+-- STEP 5: Populate existing appointments with the Legacy service placeholder
+-- -------------------------------------------------------------------------
+UPDATE appointments 
+SET service_id = '00000000-0000-0000-0000-000000000000'::uuid
+WHERE service_id IS NULL;
+
+-- -------------------------------------------------------------------------
+-- STEP 6: Enforce NOT NULL constraint on service_id
+-- -------------------------------------------------------------------------
+ALTER TABLE appointments 
+    ALTER COLUMN service_id SET NOT NULL;
+
+-- -------------------------------------------------------------------------
+-- STEP 7: Implement Database Trigger for Overlap Prevention (Audit 3.2)
+-- -------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION fn_prevent_appointment_overlap()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_service_duration INT;
+    v_overlap_exists BOOLEAN;
+    v_therapist_name VARCHAR(150);
+BEGIN
+    -- Get duration of the selected service
+    SELECT duration_minutes INTO v_service_duration 
+    FROM services 
+    WHERE id = NEW.service_id;
+    
+    IF v_service_duration IS NULL THEN
+        v_service_duration := 60; -- Safe fallback
+    END IF;
+
+    -- Query therapist's name for informative error message
+    SELECT nama INTO v_therapist_name
+    FROM therapists
+    WHERE id = NEW.therapist_id;
+
+    -- Check if therapist has any overlapping active appointment
+    SELECT EXISTS (
+        SELECT 1 
+        FROM appointments a
+        JOIN services s ON a.service_id = s.id
+        WHERE a.therapist_id = NEW.therapist_id
+          AND a.id <> COALESCE(NEW.id, '00000000-0000-0000-0000-000000000000'::uuid)
+          AND a.status <> 'Cancelled'
+          AND NEW.status <> 'Cancelled'
+          AND NEW.appointment_ts < a.appointment_ts + (s.duration_minutes * INTERVAL '1 minute')
+          AND a.appointment_ts < NEW.appointment_ts + (v_service_duration * INTERVAL '1 minute')
+    ) INTO v_overlap_exists;
+
+    IF v_overlap_exists THEN
+        RAISE EXCEPTION 'Database Overlap Constraint: Terapis % sudah memiliki agenda aktif pada jam tersebut!', COALESCE(v_therapist_name, NEW.therapist_id::text);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Attach overlap checking trigger BEFORE INSERT OR UPDATE
+DROP TRIGGER IF EXISTS trg_on_appointment_overlap_check ON appointments;
+CREATE TRIGGER trg_on_appointment_overlap_check
+BEFORE INSERT OR UPDATE ON appointments
+FOR EACH ROW
+EXECUTE FUNCTION fn_prevent_appointment_overlap();
+
+COMMIT;

@@ -1,0 +1,8 @@
+-- Migration: Add is_active to services (Issue 3.5)
+-- Ensures catalog items can be logically disabled without breaking historical transaction data.
+
+ALTER TABLE services 
+ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
+
+-- Create an index to speed up filtering of active services in the POS catalog
+CREATE INDEX IF NOT EXISTS idx_services_active ON services (is_active) WHERE is_active = TRUE;

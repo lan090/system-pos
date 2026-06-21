@@ -1,0 +1,21 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "css.lint.propertyIgnoredDueToDisplay": "ignore",
+  "css.lint.vendorPrefix": "ignore",
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/dev-dist": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/dev-dist": true
+  },
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": true,
+  "deno.enablePaths": [
+    "supabase/functions"
+  ]
+}

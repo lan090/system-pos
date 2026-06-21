@@ -1,0 +1,6 @@
+{
+  "name": "FSRMS v2.0",
+  "description": "Premium salon and reflexology management system featuring POS terminal with offline mode, bento-grid dashboard, customer database with conflict checking, service catalog, and appointments planner.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

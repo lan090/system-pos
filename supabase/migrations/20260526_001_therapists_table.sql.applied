@@ -1,0 +1,135 @@
+-- =========================================================================
+-- MIGRATION: 20260526_001_therapists_table
+-- Issue Fix: Audit Finding 2.1a — Terapis disimpan di tabel auth yang salah
+-- Therapists are NOT system users. They are scheduling entities only.
+-- =========================================================================
+
+BEGIN;
+
+-- -------------------------------------------------------------------------
+-- STEP 1: Create standalone therapists table
+-- No auth credentials needed — pure scheduling reference entity
+-- -------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS therapists (
+    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    nama       VARCHAR(150) NOT NULL,
+    is_active  BOOLEAN     NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Enable RLS on therapists
+ALTER TABLE therapists ENABLE ROW LEVEL SECURITY;
+
+-- -------------------------------------------------------------------------
+-- STEP 2: Seed existing therapist data from users table
+-- Migrate any users with role='Terapis' into the new therapists table
+-- Maps user.email → therapists.nama (nama = email prefix before @)
+-- -------------------------------------------------------------------------
+INSERT INTO therapists (id, nama, is_active, created_at)
+SELECT
+    gen_random_uuid(),
+    SPLIT_PART(email, '@', 1),  -- Use email prefix as display name placeholder
+    TRUE,
+    created_at
+FROM users
+WHERE role = 'Terapis'
+ON CONFLICT DO NOTHING;
+
+-- -------------------------------------------------------------------------
+-- STEP 3: Add new therapist_id column (referencing therapists, not users)
+-- to appointments — temporarily nullable for migration window
+-- -------------------------------------------------------------------------
+ALTER TABLE appointments
+    ADD COLUMN IF NOT EXISTS therapist_ref_id UUID NULL REFERENCES therapists(id) ON DELETE RESTRICT;
+
+-- -------------------------------------------------------------------------
+-- STEP 4: Drop old broken UNIQUE constraint (timestamp-only, not overlap-safe)
+-- This was identified as Critical issue in audit — replaced by proper overlap
+-- detection via application/trigger layer in a future migration.
+-- -------------------------------------------------------------------------
+ALTER TABLE appointments
+    DROP CONSTRAINT IF EXISTS uq_therapist_schedule;
+
+-- -------------------------------------------------------------------------
+-- STEP 5: Drop old FK from appointments.therapist_id → users.id
+-- -------------------------------------------------------------------------
+ALTER TABLE appointments
+    DROP CONSTRAINT IF EXISTS appointments_therapist_id_fkey;
+
+-- -------------------------------------------------------------------------
+-- STEP 6: Rename old column, rename new column to canonical name
+-- -------------------------------------------------------------------------
+ALTER TABLE appointments RENAME COLUMN therapist_id TO therapist_id_old_users_ref;
+ALTER TABLE appointments RENAME COLUMN therapist_ref_id TO therapist_id;
+
+-- -------------------------------------------------------------------------
+-- STEP 7: Once therapist_id is populated (in prod: via data migration script),
+-- set NOT NULL constraint. 
+-- NOTE: In fresh installs, set NOT NULL immediately.
+-- In existing prod: populate therapist_id first, then run:
+--   ALTER TABLE appointments ALTER COLUMN therapist_id SET NOT NULL;
+-- -------------------------------------------------------------------------
+
+-- -------------------------------------------------------------------------
+-- STEP 8: Drop 'Terapis' role from users CHECK constraint
+-- users table is now ONLY for authenticated staff: Owner/Manager, Kasir
+-- -------------------------------------------------------------------------
+ALTER TABLE users
+    DROP CONSTRAINT IF EXISTS chk_user_role;
+
+ALTER TABLE users
+    ADD CONSTRAINT chk_user_role
+    CHECK (role IN ('Owner/Manager', 'Kasir/Front Desk'));
+
+-- -------------------------------------------------------------------------
+-- STEP 9: Remove old Terapis rows from users (only if not referenced elsewhere)
+-- Safe guard: only remove if therapist_id_old_users_ref has been migrated
+-- -------------------------------------------------------------------------
+-- [MANUAL STEP IN PROD]: Verify no FK references remain before running:
+-- DELETE FROM users WHERE role = 'Terapis';
+
+-- -------------------------------------------------------------------------
+-- STEP 10: Add index on therapists for fast name lookup in appointment forms
+-- -------------------------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_therapists_active
+    ON therapists (is_active, nama)
+    WHERE is_active = TRUE;
+
+-- -------------------------------------------------------------------------
+-- RLS POLICIES FOR therapists TABLE
+-- -------------------------------------------------------------------------
+
+-- Owner: Full control (idempotent: drop first)
+DROP POLICY IF EXISTS "Owner full control on Therapists" ON therapists;
+CREATE POLICY "Owner full control on Therapists"
+ON therapists FOR ALL
+USING (get_current_user_role() = 'Owner/Manager');
+
+-- Kasir: Read-only (idempotent: drop first)
+DROP POLICY IF EXISTS "Kasir can read Therapists list" ON therapists;
+CREATE POLICY "Kasir can read Therapists list"
+ON therapists FOR SELECT
+USING (get_current_user_role() IN ('Owner/Manager', 'Kasir/Front Desk'));
+
+COMMIT;
+
+-- =========================================================================
+-- POST-MIGRATION VERIFICATION QUERIES
+-- Run these manually after applying migration to verify integrity:
+-- =========================================================================
+--
+-- 1. Confirm therapists table exists with correct structure:
+--    SELECT column_name, data_type FROM information_schema.columns
+--    WHERE table_name = 'therapists';
+--
+-- 2. Confirm appointments.therapist_id now FK → therapists.id:
+--    SELECT tc.constraint_name, kcu.column_name, ccu.table_name AS foreign_table_name
+--    FROM information_schema.table_constraints tc
+--    JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+--    JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+--    WHERE tc.table_name = 'appointments' AND tc.constraint_type = 'FOREIGN KEY';
+--
+-- 3. Confirm 'Terapis' no longer valid in users.role:
+--    INSERT INTO users (email, role) VALUES ('test@test.com', 'Terapis');
+--    -- Expected: ERROR: new row violates check constraint "chk_user_role"
+-- =========================================================================

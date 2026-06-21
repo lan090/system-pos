@@ -1,0 +1,10 @@
+-- Migration: Add Void Transaction Flow (Issue 2.7 & 3.12)
+-- Enables secure tracking of voided transactions to prevent financial discrepancies
+
+ALTER TABLE transactions
+ADD COLUMN voided_by UUID REFERENCES users(id) ON DELETE SET NULL,
+ADD COLUMN voided_at TIMESTAMPTZ,
+ADD COLUMN void_reason TEXT;
+
+-- Note: The chk_transaction_status constraint and loyalty recalculation trigger
+-- have already been updated in a previous migration to support 'Voided' status.

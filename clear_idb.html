@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reset FSRMS IndexedDB</title>
+</head>
+<body style="font-family: sans-serif; padding: 40px; text-align: center; background: #FAF6F6; color: #6B3A44;">
+  <h2 style="font-weight: 800;">Reset FSRMS IndexedDB Cache</h2>
+  <p>Klik tombol di bawah ini untuk menghapus seluruh cache IndexedDB POS secara permanen:</p>
+  <button id="btn" style="background: #D98897; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    HAPUS DATABASE CACHE LOKAL
+  </button>
+  <p id="status" style="margin-top: 20px; font-weight: bold; color: #2e7d32; font-size: 14px;"></p>
+
+  <script>
+    document.getElementById('btn').onclick = function() {
+      const req1 = indexedDB.deleteDatabase('fsrms_secure_db');
+      const req2 = indexedDB.deleteDatabase('fsrms_offline_db');
+      
+      let done = 0;
+      const checkDone = () => {
+        done++;
+        if (done === 2) {
+          document.getElementById('status').innerText = '✓ Database fsrms_secure_db & fsrms_offline_db berhasil dihapus secara total!';
+        }
+      };
+
+      req1.onsuccess = req1.onerror = checkDone;
+      req2.onsuccess = req2.onerror = checkDone;
+    };
+  </script>
+</body>
+</html>
