@@ -7,7 +7,8 @@ import {
   Eye,
   EyeOff,
   WifiOff,
-  Loader2
+  Loader2,
+  Sparkles
 } from 'lucide-react';
 
 interface LoginViewProps {
@@ -46,43 +47,58 @@ export default function LoginView({ onLogin }: LoginViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6 antialiased" id="login-view">
-      <div className="w-full max-w-[420px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-wellness p-6 md:p-8 flex flex-col relative overflow-hidden">
-        {/* Decorative top ambient bar */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-container via-primary to-primary-container opacity-50"></div>
+    <div 
+      className="min-h-screen flex items-center justify-center p-6 antialiased font-sans relative overflow-hidden" 
+      id="login-view"
+      style={{ background: 'linear-gradient(135deg, #FFF0F5 0%, #FAFAFA 50%, #FFF7FA 100%)' }}
+    >
+      {/* Background decorative blobs */}
+      <div className="absolute top-[-80px] right-[-80px] w-[320px] h-[320px] rounded-full opacity-20 pointer-events-none"
+           style={{ background: 'radial-gradient(circle, #F7477B, transparent 70%)' }} />
+      <div className="absolute bottom-[-60px] left-[-60px] w-[260px] h-[260px] rounded-full opacity-15 pointer-events-none"
+           style={{ background: 'radial-gradient(circle, #F9A8BF, transparent 70%)' }} />
+      
+      <div className="w-full max-w-[420px] bg-white rounded-3xl shadow-[0_16px_48px_rgba(247,71,123,0.14)] border border-[#FFE4EC] p-8 flex flex-col relative overflow-hidden z-10">
         
-        {/* Branding header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container mb-3 shadow-sm select-none">
-            <span className="text-xl">🌸</span>
+        {/* Top accent bar */}
+        <div className="absolute top-0 left-0 w-full h-1.5 rounded-t-3xl"
+             style={{ background: 'linear-gradient(90deg, #F9A8BF, #F7477B, #C0365A)' }} />
+        
+        {/* ── BRANDING ── */}
+        <div className="text-center mb-8 mt-2">
+          <div className="inline-flex w-14 h-14 rounded-2xl bg-[#F7477B] items-center justify-center mb-4 shadow-[0_8px_24px_rgba(247,71,123,0.35)]">
+            <Sparkles className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-on-primary-container tracking-tight">AuraDesk</h1>
-          <p className="text-xs font-semibold text-on-surface-variant mt-1">Salon &amp; Reflexology Management System</p>
+          <h1 className="text-3xl font-extrabold text-[#C0365A] tracking-tight">AuraDesk</h1>
+          <p className="text-[11px] font-bold text-[#F7477B] uppercase tracking-widest mt-1.5 opacity-80">
+            Salon &amp; Kecantikan Management
+          </p>
+          <p className="text-xs text-gray-400 font-medium mt-1">Fenina Salon &amp; Reflexology</p>
         </div>
 
-        {/* Offline Mode Banner */}
+        {/* ── OFFLINE BANNER ── */}
         {isOffline && (
-          <div className="mb-5 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2.5 animate-fade-in">
+          <div className="mb-5 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2.5">
             <WifiOff className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-xs font-semibold text-amber-800">Mode Offline Terdeteksi</p>
               <p className="text-[10px] text-amber-700 leading-relaxed mt-0.5">
-                Login akan diverifikasi secara lokal menggunakan data yang tersimpan di perangkat ini. Pastikan Anda pernah login online di perangkat ini sebelumnya.
+                Login diverifikasi secara lokal menggunakan data yang tersimpan di perangkat ini.
               </p>
             </div>
           </div>
         )}
 
-        {/* Input Form */}
+        {/* ── FORM ── */}
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           
-          {/* Field: Email */}
+          {/* Email Field */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-on-surface flex items-center gap-1" htmlFor="login-email">
-              Email Address
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider" htmlFor="login-email">
+              Alamat Email
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#F9A8BF]">
                 <Mail className="w-4 h-4" />
               </span>
               <input 
@@ -94,18 +110,18 @@ export default function LoginView({ onLogin }: LoginViewProps) {
                 onChange={(e) => { setEmail(e.target.value); setErrorMessage(null); }}
                 placeholder="email@salon.com"
                 disabled={isLoading}
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg py-3.5 pl-10 pr-4 text-sm font-normal text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full bg-[#FFF7FA] border border-[#FFE4EC] rounded-xl py-3 pl-10 pr-4 text-sm font-medium text-gray-800 focus:outline-none focus:border-[#F7477B] focus:ring-2 focus:ring-[rgba(247,71,123,0.12)] transition-all disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-gray-300"
               />
             </div>
           </div>
 
-          {/* Field: Password */}
+          {/* Password Field */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-on-surface" htmlFor="login-password">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider" htmlFor="login-password">
               Password
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#F9A8BF]">
                 <Lock className="w-4 h-4" />
               </span>
               <input 
@@ -117,32 +133,33 @@ export default function LoginView({ onLogin }: LoginViewProps) {
                 onChange={(e) => { setPassword(e.target.value); setErrorMessage(null); }}
                 placeholder="••••••••"
                 disabled={isLoading}
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg py-3.5 pl-10 pr-10 text-sm font-normal text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full bg-[#FFF7FA] border border-[#FFE4EC] rounded-xl py-3 pl-10 pr-10 text-sm font-medium text-gray-800 focus:outline-none focus:border-[#F7477B] focus:ring-2 focus:ring-[rgba(247,71,123,0.12)] transition-all disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-gray-300"
               />
               <button 
                 type="button" 
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#F9A8BF] hover:text-[#F7477B] transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Error Banner (dinamis dari server / verifikasi lokal) */}
+          {/* Error Message */}
           {errorMessage && (
-            <div className="bg-error-container border border-error/20 rounded-lg p-3.5 flex items-start gap-3 animate-fade-in text-[12px]">
-              <AlertCircle className="text-error w-4 h-4 flex-shrink-0 mt-0.5" />
-              <p className="text-on-error-container font-semibold leading-relaxed">{errorMessage}</p>
+            <div className="bg-rose-50 border border-rose-200 rounded-xl p-3.5 flex items-start gap-3">
+              <AlertCircle className="text-rose-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+              <p className="text-rose-700 text-xs font-semibold leading-relaxed">{errorMessage}</p>
             </div>
           )}
 
-          {/* Submit action button */}
+          {/* Submit Button */}
           <button 
+            id="login-submit-btn"
             type="submit"
             disabled={isLoading || !email || !password}
-            className="w-full bg-primary-container text-on-primary-container font-semibold text-sm h-12 rounded-lg hover:bg-tertiary-container transition-all shadow-sm flex justify-center items-center gap-1.5 mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-[#F7477B] text-white font-bold text-sm h-12 rounded-full hover:bg-[#C0365A] transition-all shadow-[0_4px_20px_rgba(247,71,123,0.35)] hover:shadow-[0_6px_28px_rgba(247,71,123,0.45)] flex justify-center items-center gap-2 mt-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none hover:-translate-y-0.5 active:translate-y-0 uppercase tracking-wider"
           >
             {isLoading ? (
               <>
@@ -151,15 +168,15 @@ export default function LoginView({ onLogin }: LoginViewProps) {
               </>
             ) : (
               <>
-                Masuk
+                Masuk ke Sistem
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </form>
 
-        {/* Security footer note */}
-        <p className="text-center text-[10px] text-outline mt-6 font-mono select-none">
+        {/* Security note */}
+        <p className="text-center text-[10px] text-gray-400 mt-6 font-mono select-none">
           🔒 Dilindungi Supabase Auth + AES-GCM Offline Encryption
         </p>
       </div>

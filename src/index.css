@@ -1,27 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   
-  --color-background: #FDF9FA;
-  --color-surface: #FFFFFF;
-  --color-primary: #6B3A44;
-  --color-secondary: #D98897;
-  --color-accent: #C5A880;
-  --color-success: #4F8A6B;
-  --color-warning: #D4A15A;
-  --color-danger: #C85C5C;
-  --color-border: #F5E1E4;
-
-  --color-on-background: #6B3A44;
-  --color-surface-dim: #FAF3F4;
-  --color-error: #C85C5C;
-  --color-tertiary: #C5A880;
+  /* ═══════════════════════════════════════════════
+     HOT PINK VIBRANT PALETTE — Referensi Kasir v2
+     ═══════════════════════════════════════════════ */
   
-  --shadow-premium-sm: 0 2px 8px rgba(107, 58, 68, 0.02);
-  --shadow-premium-md: 0 8px 24px rgba(107, 58, 68, 0.04), 0 2px 4px rgba(107, 58, 68, 0.02);
-  --shadow-premium-lg: 0 16px 40px rgba(107, 58, 68, 0.06), 0 4px 12px rgba(107, 58, 68, 0.03);
+  /* Core Brand */
+  --color-background: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-primary: #C0365A;          /* deep rose — text/icon primary */
+  --color-secondary: #F7477B;        /* hot pink vivid — CTA, active state */
+  --color-accent: #F9A8BF;           /* soft pink — subtle highlights */
+  
+  /* Semantic */
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --color-info: #0EA5E9;
+  
+  /* Surface system */
+  --color-border: #FFE4EC;
+  --color-on-background: #1A0A10;
+  --color-surface-dim: #FFF0F5;
+  --color-surface-hover: #FFF7FA;
+  --color-error: #DC2626;
+  --color-tertiary: #F9A8BF;
+
+  /* Sidebar specific */
+  --color-sidebar-bg: #FFFFFF;
+  --color-sidebar-active-bg: #FFF0F5;
+  --color-sidebar-active-text: #C0365A;
+  --color-sidebar-inactive-text: #6B7280;
+  
+  /* Shadows — pink-tinted */
+  --shadow-premium-sm: 0 2px 8px rgba(247, 71, 123, 0.06);
+  --shadow-premium-md: 0 8px 24px rgba(247, 71, 123, 0.10), 0 2px 6px rgba(247, 71, 123, 0.06);
+  --shadow-premium-lg: 0 16px 48px rgba(247, 71, 123, 0.14), 0 4px 12px rgba(247, 71, 123, 0.08);
+  --shadow-premium-pink: 0 4px 20px rgba(247, 71, 123, 0.30);
 }
 
 /* Custom Scrollbar */
@@ -33,19 +51,103 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d7c1c4;
+  background: #F9A8BF;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #cd8e99;
+  background: #F7477B;
 }
 
 .shadow-plum {
-  box-shadow: 0 4px 12px rgba(107, 58, 68, 0.06);
+  box-shadow: 0 4px 12px rgba(247, 71, 123, 0.10);
 }
 
 .shadow-wellness {
-  box-shadow: 0 4px 12px rgba(107, 58, 68, 0.06);
+  box-shadow: 0 4px 12px rgba(247, 71, 123, 0.10);
+}
+
+/* =========================================================================
+   BUTTON UTILITIES — Hot Pink Design System v2
+   ========================================================================= */
+
+.btn-primary {
+  background-color: #F7477B;
+  color: #FFFFFF;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(247, 71, 123, 0.30);
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.btn-primary:hover {
+  background-color: #C0365A;
+  box-shadow: 0 6px 20px rgba(247, 71, 123, 0.40);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(247, 71, 123, 0.25);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background-color: #FFF0F5;
+  color: #C0365A;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.75rem;
+  border: 1px solid #FFE4EC;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.btn-secondary:hover {
+  background-color: #FFE4EC;
+  border-color: #F9A8BF;
+}
+
+/* =========================================================================
+   CARD UTILITIES
+   ========================================================================= */
+
+.card-premium {
+  background: #FFFFFF;
+  border-radius: 1rem;
+  border: 1px solid #FFE4EC;
+  box-shadow: 0 2px 8px rgba(247, 71, 123, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-premium:hover {
+  box-shadow: 0 8px 24px rgba(247, 71, 123, 0.10);
+  transform: translateY(-1px);
+}
+
+/* Input focus ring */
+.input-focus:focus {
+  outline: none;
+  border-color: #F7477B;
+  box-shadow: 0 0 0 3px rgba(247, 71, 123, 0.12);
 }
 
 /* =========================================================================

@@ -722,10 +722,10 @@ export default function POSTerminalView({
   // Loading state
   if (isShiftLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center h-full bg-[#FDF9FA]">
-        <div className="flex flex-col items-center gap-3 text-[#D98897]">
-          <RefreshCw className="w-7 h-7 animate-spin" />
-          <p className="text-xs font-bold text-[#6B3A44]">Memuat sesi shift...</p>
+      <div className="flex-1 flex items-center justify-center h-full bg-[#FAFAFA]">
+        <div className="flex flex-col items-center gap-3 text-[#F9A8BF]">
+          <RefreshCw className="w-7 h-7 animate-spin text-[#F7477B]" />
+          <p className="text-xs font-bold text-[#C0365A]">Memuat sesi shift...</p>
         </div>
       </div>
     );
@@ -734,22 +734,22 @@ export default function POSTerminalView({
   // Shift Gatekeeper
   if (!activeShift) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6 h-full max-w-[1280px] mx-auto w-full font-sans bg-[#FDF9FA]">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-premium-md border border-[#F5E1E4] text-center space-y-6">
-          <div className="w-16 h-16 bg-[#FAF3F4] rounded-full flex items-center justify-center mx-auto text-[#D98897] mb-2 border border-[#F5E1E4] shadow-premium-sm">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 h-full max-w-[1280px] mx-auto w-full font-sans bg-[#FAFAFA]">
+        <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-[0_16px_48px_rgba(247,71,123,0.12)] border border-[#FFE4EC] text-center space-y-6">
+          <div className="w-16 h-16 bg-[#F7477B] rounded-2xl flex items-center justify-center mx-auto text-white mb-2 shadow-[0_8px_24px_rgba(247,71,123,0.35)]">
             <Banknote className="w-7 h-7" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-[#6B3A44]">Buka Shift Kasir</h2>
-            <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-2">
+            <h2 className="text-lg font-extrabold text-[#C0365A]">Buka Shift Kasir</h2>
+            <p className="text-xs text-gray-500 font-medium leading-relaxed mt-2">
               Deklarasikan identitas kasir bertugas dan saldo kas awal laci sebelum melayani transaksi penjualan.
             </p>
           </div>
 
           {/* Cashier Name Input */}
           <div className="space-y-2 text-left">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-[#6B3A44]">
-              Nama Lengkap Kasir/Operator <span className="text-[#C85C5C]">*</span>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-700">
+              Nama Lengkap Kasir/Operator <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -757,14 +757,14 @@ export default function POSTerminalView({
               value={operatorNameInput}
               onChange={(e) => setOperatorNameInput(e.target.value)}
               placeholder="Masukkan nama operator..."
-              className={`w-full bg-[#FAF3F4] border rounded-xl py-3.5 px-4 text-xs font-semibold text-[#6B3A44] focus:outline-none focus:border-[#D98897] transition-all ${
+              className={`w-full bg-[#FFF7FA] border rounded-xl py-3.5 px-4 text-xs font-semibold text-gray-800 focus:outline-none focus:border-[#F7477B] focus:ring-2 focus:ring-[rgba(247,71,123,0.12)] transition-all ${
                 operatorNameInput.length > 0 && !isOperatorNameValid
-                  ? 'border-[#C85C5C]'
-                  : 'border-[#F5E1E4]'
+                  ? 'border-red-400'
+                  : 'border-[#FFE4EC]'
               }`}
             />
             {operatorNameInput.length > 0 && !isOperatorNameValid && (
-              <p className="text-[10px] text-[#C85C5C] font-semibold flex items-center gap-1">
+              <p className="text-[10px] text-red-500 font-semibold flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5" /> Nama minimal 3 karakter.
               </p>
             )}
@@ -772,16 +772,16 @@ export default function POSTerminalView({
 
           {/* Saldo Awal Kas Input */}
           <div className="space-y-2 text-left">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-[#6B3A44]">Saldo Awal Kas Laci</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-700">Saldo Awal Kas Laci</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#6B3A44]/70">Rp</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#F7477B]">Rp</span>
               <input
                 type="number"
                 id="starting-cash-input"
                 value={startingCashInput}
                 onChange={(e) => setStartingCashInput(e.target.value)}
                 placeholder="0"
-                className="w-full bg-[#FAF3F4] border border-[#F5E1E4] rounded-xl py-3.5 pl-10 pr-4 text-xs font-mono text-[#6B3A44] focus:outline-none focus:border-[#D98897] transition-all"
+                className="w-full bg-[#FFF7FA] border border-[#FFE4EC] rounded-xl py-3.5 pl-10 pr-4 text-xs font-mono text-gray-800 focus:outline-none focus:border-[#F7477B] focus:ring-2 focus:ring-[rgba(247,71,123,0.12)] transition-all"
               />
             </div>
           </div>
@@ -790,13 +790,13 @@ export default function POSTerminalView({
             onClick={handleOpenShift}
             disabled={!isOpenShiftReady}
             id="open-shift-btn"
-            className="w-full bg-[#D98897] text-white font-bold uppercase tracking-wider text-xs py-3.5 rounded-xl hover:bg-[#6B3A44] shadow-premium-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full bg-[#F7477B] text-white font-bold uppercase tracking-wider text-xs py-3.5 rounded-full hover:bg-[#C0365A] shadow-[0_4px_20px_rgba(247,71,123,0.35)] hover:shadow-[0_6px_28px_rgba(247,71,123,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:translate-y-0 cursor-pointer"
           >
             Buka Shift &amp; Jualan
           </button>
 
           {!isOpenShiftReady && (
-            <p className="text-[9px] text-[#C85C5C] font-bold uppercase tracking-wider -mt-3">
+            <p className="text-[9px] text-red-500 font-bold uppercase tracking-wider -mt-3">
               {!isOperatorNameValid ? 'Lengkapi nama operator kasir.' : 'Saldo laci wajib dideklarasikan.'}
             </p>
           )}
@@ -806,7 +806,7 @@ export default function POSTerminalView({
   }
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-6 h-full max-w-[1280px] mx-auto w-full overflow-hidden bg-[#FDF9FA] font-sans" id="pos-terminal-view">
+    <div className="flex-1 flex flex-col lg:flex-row gap-6 h-full max-w-[1280px] mx-auto w-full overflow-hidden bg-[#FAFAFA] font-sans" id="pos-terminal-view">
       
       {/* Print stylesheet */}
       <style dangerouslySetInnerHTML={{
@@ -833,12 +833,16 @@ export default function POSTerminalView({
             border: none !important;
             box-shadow: none !important;
             background: white !important;
+            font-family: Georgia, serif !important;
           }
           #thermal-receipt-area * {
             color: black !important;
-            font-family: 'Courier New', Courier, monospace !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+          }
+          #thermal-receipt-area .font-mono,
+          #thermal-receipt-area .font-mono * {
+            font-family: 'Courier New', Courier, monospace !important;
           }
           @page {
             size: 58mm auto;

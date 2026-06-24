@@ -452,25 +452,25 @@ export default function DashboardView({
   };
 
   return (
-    <div className="space-y-8 font-sans bg-[#FDF9FA]" id="dashboard-view">
+    <div className="space-y-6 font-sans bg-[#FAFAFA]" id="dashboard-view">
       
-      {/* Page Header */}
-      <div className="flex justify-between items-center border-b border-[#F5E1E4] pb-4">
+      {/* ── Page Header ── */}
+      <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-bold text-[#6B3A44] tracking-tight">Dashboard Overview</h2>
-          <p className="text-[11px] font-bold text-[#D98897] uppercase tracking-widest mt-0.5">Fenina Salon &amp; Reflexology</p>
+          <h2 className="text-xl font-extrabold text-[#C0365A] tracking-tight">Dashboard</h2>
+          <p className="text-[11px] font-bold text-[#F7477B] uppercase tracking-widest mt-0.5 opacity-70">Fenina Salon &amp; Reflexology</p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-[#4F8A6B] animate-pulse' : 'bg-[#C85C5C]'}`} />
-          <span className="text-xs font-bold uppercase tracking-wider text-[#6B3A44]">
-            {isOnline ? 'System Online' : 'Offline Mode'}
+        <div className="flex items-center gap-2 bg-white border border-[#FFE4EC] rounded-full px-3 py-1.5 shadow-[0_2px_8px_rgba(247,71,123,0.06)]">
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-600">
+            {isOnline ? 'Supabase Terhubung' : 'Mode Offline'}
           </span>
         </div>
       </div>
       
-      {/* Safe Mode Banner */}
+      {/* ── Safe Mode Banner ── */}
       {safeModeViewModel.isSafeModeActive && (
-        <div className="bg-[#C85C5C] text-white font-semibold text-xs px-6 py-4 rounded-xl flex items-center gap-3 shadow-premium-md select-none animate-pulse">
+        <div className="bg-red-600 text-white font-semibold text-xs px-6 py-4 rounded-2xl flex items-center gap-3 shadow-[0_4px_16px_rgba(220,38,38,0.30)] select-none animate-pulse">
           <ShieldAlert className="w-5 h-5 text-white flex-shrink-0" />
           <div className="flex-1">
             <span className="uppercase tracking-widest block font-bold text-[10px]">SAFE MODE ACTIVE</span>
@@ -479,75 +479,90 @@ export default function DashboardView({
         </div>
       )}
 
-      {/* ────────────────── 1. PREMIUM KPI ROW ────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+      {/* ────────────────── 1. KPI ROW ────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         
         {/* KPI 1: Daily Revenue */}
-        <div className="bg-white rounded-2xl p-6 shadow-premium-md flex flex-col justify-between h-36 relative overflow-hidden group transition-all duration-200 hover:-translate-y-0.5">
-          <div>
-            <span className="text-[10px] font-bold text-[#D98897] uppercase tracking-widest block mb-1">Daily Revenue</span>
-            <div className="text-2xl font-bold text-[#6B3A44] tracking-tight">
-              Rp {totalSalesToday.toLocaleString('id-ID')}
+        <div className="bg-white rounded-2xl p-5 border border-[#FFE4EC] shadow-[0_2px_8px_rgba(247,71,123,0.06)] flex flex-col gap-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(247,71,123,0.12)] transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Pendapatan Hari Ini</span>
+            <div className="w-7 h-7 rounded-lg bg-[#FFF0F5] flex items-center justify-center">
+              <TrendingUp className="w-3.5 h-3.5 text-[#F7477B]" />
             </div>
           </div>
-          <span className="text-[10px] font-medium text-[#4F8A6B] uppercase tracking-wide flex items-center gap-1">
-            <TrendingUp className="w-3.5 h-3.5" /> Combined Sales
+          <div className="text-xl font-extrabold text-[#C0365A] tracking-tight leading-none">
+            Rp {totalSalesToday.toLocaleString('id-ID')}
+          </div>
+          <span className="text-[10px] font-semibold text-green-600 flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" /> +12.5% dari kemarin
           </span>
         </div>
 
         {/* KPI 2: Transaction Count */}
-        <div className="bg-white rounded-2xl p-6 shadow-premium-md flex flex-col justify-between h-36 relative overflow-hidden group transition-all duration-200 hover:-translate-y-0.5">
-          <div>
-            <span className="text-[10px] font-bold text-[#D98897] uppercase tracking-widest block mb-1">Transactions</span>
-            <div className="text-2xl font-bold text-[#6B3A44] tracking-tight">
-              {successTransactionsCount} Sesi
+        <div className="bg-white rounded-2xl p-5 border border-[#FFE4EC] shadow-[0_2px_8px_rgba(247,71,123,0.06)] flex flex-col gap-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(247,71,123,0.12)] transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Transaksi</span>
+            <div className="w-7 h-7 rounded-lg bg-[#FFF0F5] flex items-center justify-center">
+              <Receipt className="w-3.5 h-3.5 text-[#F7477B]" />
             </div>
           </div>
-          <span className="text-[10px] font-medium text-[#D98897] uppercase tracking-wide flex items-center gap-1">
-            <Activity className="w-3.5 h-3.5 animate-pulse" /> Active Queue Sum
+          <div className="text-xl font-extrabold text-[#C0365A] tracking-tight leading-none">
+            {successTransactionsCount}
+          </div>
+          <span className="text-[10px] font-semibold text-[#F7477B] flex items-center gap-1">
+            <Activity className="w-3 h-3" /> +{queueCount} transaksi
           </span>
         </div>
 
         {/* KPI 3: Average Ticket */}
-        <div className="bg-white rounded-2xl p-6 shadow-premium-md flex flex-col justify-between h-36 relative overflow-hidden group transition-all duration-200 hover:-translate-y-0.5">
-          <div>
-            <span className="text-[10px] font-bold text-[#D98897] uppercase tracking-widest block mb-1">Average Ticket</span>
-            <div className="text-2xl font-bold text-[#6B3A44] tracking-tight">
-              Rp {averageTicketSize.toLocaleString('id-ID')}
+        <div className="bg-white rounded-2xl p-5 border border-[#FFE4EC] shadow-[0_2px_8px_rgba(247,71,123,0.06)] flex flex-col gap-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(247,71,123,0.12)] transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Rata-rata Kunjungan</span>
+            <div className="w-7 h-7 rounded-lg bg-[#FFF0F5] flex items-center justify-center">
+              <Wallet className="w-3.5 h-3.5 text-[#F7477B]" />
             </div>
           </div>
-          <span className="text-[10px] font-medium text-stone-500 uppercase tracking-wide">
-            Per Checkout Session
+          <div className="text-xl font-extrabold text-[#C0365A] tracking-tight leading-none">
+            Rp {averageTicketSize.toLocaleString('id-ID')}
+          </div>
+          <span className="text-[10px] font-semibold text-gray-400">
+            Per sesi checkout
           </span>
         </div>
 
         {/* KPI 4: Queue Health */}
-        <div className="bg-white rounded-2xl p-6 shadow-premium-md flex flex-col justify-between h-36 relative overflow-hidden group transition-all duration-200 hover:-translate-y-0.5">
-          <div>
-            <span className="text-[10px] font-bold text-[#D98897] uppercase tracking-widest block mb-1">Queue Status</span>
-            <div className="text-2xl font-bold text-[#6B3A44] tracking-tight">
-              {queueCount > 0 ? `${queueCount} Pending` : 'Clean'}
+        <div className="bg-white rounded-2xl p-5 border border-[#FFE4EC] shadow-[0_2px_8px_rgba(247,71,123,0.06)] flex flex-col gap-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(247,71,123,0.12)] transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Antrean Mutasi</span>
+            <div className="w-7 h-7 rounded-lg bg-[#FFF0F5] flex items-center justify-center">
+              <Database className="w-3.5 h-3.5 text-[#F7477B]" />
             </div>
           </div>
-          <span className={`text-[10px] font-bold uppercase tracking-wider ${
-            syncStatus === 'HEALTHY' ? 'text-[#4F8A6B]' :
-            syncStatus === 'WARNING' ? 'text-[#D4A15A]' : 'text-[#C85C5C] animate-pulse'
+          <div className="text-xl font-extrabold text-[#C0365A] tracking-tight leading-none">
+            {queueCount > 0 ? `${queueCount}` : '0'}
+          </div>
+          <span className={`text-[10px] font-bold flex items-center gap-1 ${
+            syncStatus === 'HEALTHY' ? 'text-green-600' :
+            syncStatus === 'WARNING' ? 'text-amber-600' : 'text-red-600'
           }`}>
-            {syncStatus === 'HEALTHY' ? '● Sync Healthy' :
-             syncStatus === 'WARNING' ? '▲ Sync Pending' : '■ DLQ Attention Required'}
+            {syncStatus === 'HEALTHY' ? '● Sync Sehat' :
+             syncStatus === 'WARNING' ? '▲ Menunggu Sync' : '■ Perlu Tindakan'}
           </span>
         </div>
 
         {/* KPI 5: Active Shift */}
-        <div className="bg-white rounded-2xl p-6 shadow-premium-md flex flex-col justify-between h-36 relative overflow-hidden group transition-all duration-200 hover:-translate-y-0.5">
-          <div>
-            <span className="text-[10px] font-bold text-[#D98897] uppercase tracking-widest block mb-1">Active Shift</span>
-            <div className="text-lg font-bold text-[#6B3A44] truncate">
-              {shiftSummary.shiftStatus === 'Open' ? shiftSummary.operatorName : 'Closed'}
+        <div className="bg-white rounded-2xl p-5 border border-[#FFE4EC] shadow-[0_2px_8px_rgba(247,71,123,0.06)] flex flex-col gap-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(247,71,123,0.12)] transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Shift Aktif</span>
+            <div className="w-7 h-7 rounded-lg bg-[#FFF0F5] flex items-center justify-center">
+              <Clock className="w-3.5 h-3.5 text-[#F7477B]" />
             </div>
           </div>
-          <span className="text-[10px] font-bold text-[#C5A880] uppercase tracking-wider font-mono">
-            {shiftSummary.shiftStatus === 'Open' ? `Duration: ${shiftSummary.shiftDuration}` : 'No active shift'}
+          <div className="text-base font-extrabold text-[#C0365A] truncate leading-none">
+            {shiftSummary.shiftStatus === 'Open' ? shiftSummary.operatorName : 'Tutup'}
+          </div>
+          <span className="text-[10px] font-bold text-[#F7477B] font-mono">
+            {shiftSummary.shiftStatus === 'Open' ? `⏱ ${shiftSummary.shiftDuration}` : 'Tidak ada shift'}
           </span>
         </div>
 
@@ -558,30 +573,30 @@ export default function DashboardView({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Revenue Trend Line Chart */}
-          <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-premium-md flex flex-col justify-between min-h-[350px]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 border-b border-[#F5E1E4] pb-3">
+          <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-[#FFE4EC] shadow-[0_2px_8px_rgba(247,71,123,0.06)] flex flex-col justify-between min-h-[350px]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 border-b border-[#FFE4EC] pb-3">
               <div className="flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-[#D98897]" />
-                <h3 className="text-sm font-semibold text-[#6B3A44]">
-                  {timeScale === 'keseluruhan' ? 'Total Revenue Trend' :
-                   timeScale === 'harian' ? 'Daily Revenue Trend' :
-                   timeScale === 'mingguan' ? 'Weekly Revenue Trend' :
-                   timeScale === 'bulanan' ? 'Monthly Revenue Trend' :
-                   'Yearly Revenue Trend'}
+                <CalendarDays className="w-4 h-4 text-[#F7477B]" />
+                <h3 className="text-sm font-bold text-[#C0365A]">
+                  {timeScale === 'keseluruhan' ? 'Grafik Pendapatan' :
+                   timeScale === 'harian' ? 'Grafik Pendapatan Hari Ini' :
+                   timeScale === 'mingguan' ? 'Grafik Pendapatan Minggu Ini' :
+                   timeScale === 'bulanan' ? 'Grafik Pendapatan Bulanan' :
+                   'Grafik Pendapatan Tahunan'}
                 </h3>
               </div>
               
               <div className="flex items-center gap-2 flex-wrap">
                 {trendBadge}
-                <div className="flex bg-[#FAF3F4] p-0.5 rounded-lg border border-[#F5E1E4]">
+                <div className="flex bg-[#FFF0F5] p-0.5 rounded-lg border border-[#FFE4EC]">
                   {(['keseluruhan', 'harian', 'mingguan', 'bulanan', 'tahunan'] as const).map((scale) => (
                     <button
                       key={scale}
                       onClick={() => setTimeScale(scale)}
                       className={`text-[9px] font-bold px-2.5 py-1 rounded-md transition-all uppercase tracking-wider cursor-pointer ${
                         timeScale === scale
-                          ? 'bg-[#6B3A44] text-white shadow-premium-sm'
-                          : 'text-[#6B3A44]/70 hover:text-[#6B3A44] hover:bg-white/80'
+                          ? 'bg-[#F7477B] text-white shadow-[0_2px_8px_rgba(247,71,123,0.30)]'
+                          : 'text-[#C0365A]/60 hover:text-[#C0365A] hover:bg-white/80'
                       }`}
                     >
                       {scale === 'keseluruhan' ? 'Semua' : scale === 'harian' ? 'Hari' : scale === 'mingguan' ? 'Minggu' : scale === 'bulanan' ? 'Bulan' : 'Tahun'}
@@ -597,8 +612,8 @@ export default function DashboardView({
                   <svg viewBox="0 0 500 130" className="w-full h-full overflow-visible">
                     <defs>
                       <linearGradient id="revenueAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#D98897" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="#D98897" stopOpacity="0.0" />
+                        <stop offset="0%" stopColor="#F7477B" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#F7477B" stopOpacity="0.0" />
                       </linearGradient>
                     </defs>
 
@@ -612,17 +627,17 @@ export default function DashboardView({
                             y1={y} 
                             x2="485" 
                             y2={y} 
-                            stroke="#F5E1E4" 
+                            stroke="#FFE4EC" 
                             strokeWidth="1" 
                             strokeDasharray="4,4" 
-                            opacity="0.8"
+                            opacity="1"
                           />
                           <text 
                             x="45" 
                             y={y + 3} 
                             textAnchor="end" 
-                            fill="#6B3A44" 
-                            className="text-[9px] font-mono font-bold opacity-75"
+                            fill="#C0365A" 
+                            className="text-[9px] font-mono font-bold opacity-60"
                           >
                             {formatYLabel(maxRevenueValue * (1 - ratio))}
                           </text>
@@ -637,7 +652,7 @@ export default function DashboardView({
                     <path 
                       d={lineChartPoints.path} 
                       fill="none" 
-                      stroke="#D98897" 
+                      stroke="#F7477B" 
                       strokeWidth="2.5" 
                       strokeLinecap="round" 
                       strokeLinejoin="round" 
@@ -651,9 +666,9 @@ export default function DashboardView({
                           cy={p.y} 
                           r="3" 
                           fill="#FFFFFF" 
-                          stroke="#6B3A44" 
-                          strokeWidth="1.5"
-                          className="transition-all duration-150 group-hover/dot:r-4.5 group-hover/dot:fill-[#D98897]"
+                          stroke="#F7477B" 
+                          strokeWidth="2"
+                          className="transition-all duration-150 group-hover/dot:fill-[#F7477B]"
                         />
                         
                         <foreignObject 
@@ -663,9 +678,9 @@ export default function DashboardView({
                           height="28" 
                           className="pointer-events-none opacity-0 group-hover/dot:opacity-100 transition-opacity duration-150 z-50 overflow-visible"
                         >
-                          <div className="bg-[#4A1D27] text-white text-[9px] px-1.5 py-0.5 rounded shadow-premium-md text-center leading-none font-bold">
+                          <div className="bg-[#C0365A] text-white text-[9px] px-1.5 py-0.5 rounded-lg shadow-[0_4px_12px_rgba(192,54,90,0.30)] text-center leading-none font-bold">
                             <span className="block opacity-80">{p.label}</span>
-                            <span className="block mt-0.5 text-[#D98897]">{p.raw}</span>
+                            <span className="block mt-0.5 text-[#F9A8BF]">{p.raw}</span>
                           </div>
                         </foreignObject>
                       </g>
@@ -678,8 +693,8 @@ export default function DashboardView({
                         x={p.x} 
                         y="125" 
                         textAnchor="middle" 
-                        fill="#6B3A44" 
-                        className="text-[9px] font-bold opacity-75"
+                        fill="#C0365A" 
+                        className="text-[9px] font-bold opacity-60"
                       >
                         {p.label}
                       </text>
@@ -700,7 +715,7 @@ export default function DashboardView({
               )}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-[#F5E1E4] flex items-center justify-between text-[10px] text-[#6B3A44] font-medium opacity-75">
+            <div className="mt-4 pt-3 border-t border-[#FFE4EC] flex items-center justify-between text-[10px] text-[#C0365A] font-medium opacity-70">
               <span>
                 {timeScale === 'keseluruhan' ? 'Ikhtisar tren pendapatan tahunan keseluruhan.' :
                  timeScale === 'harian' ? 'Ikhtisar tren pendapatan kumulatif per jam.' :
@@ -708,18 +723,18 @@ export default function DashboardView({
                  timeScale === 'bulanan' ? 'Ikhtisar tren pendapatan mingguan bulan ini.' :
                  'Ikhtisar tren pendapatan bulanan tahun ini.'}
               </span>
-              <span className="text-[#D98897] font-bold flex items-center gap-1 uppercase">
+              <span className="text-[#F7477B] font-bold flex items-center gap-1 uppercase">
                 <Info className="w-3.5 h-3.5" /> Sync Engine Connected
               </span>
             </div>
           </div>
 
           {/* Donut Chart: Top Services */}
-          <div className="bg-white rounded-2xl p-6 shadow-premium-md flex flex-col justify-between">
+          <div className="bg-white rounded-2xl p-6 border border-[#FFE4EC] shadow-[0_2px_8px_rgba(247,71,123,0.06)] flex flex-col justify-between">
             <div>
-              <div className="flex justify-between items-center mb-4 border-b border-[#F5E1E4] pb-3">
-                <h3 className="text-sm font-semibold text-[#6B3A44] uppercase tracking-wider flex items-center gap-1.5">
-                  <Award className="w-4 h-4 text-[#D98897]" />
+              <div className="flex justify-between items-center mb-4 border-b border-[#FFE4EC] pb-3">
+                <h3 className="text-sm font-bold text-[#C0365A] flex items-center gap-1.5">
+                  <Award className="w-4 h-4 text-[#F7477B]" />
                   Layanan Terfavorit
                 </h3>
               </div>

@@ -20,12 +20,12 @@ export default function PaymentSelector({
   ];
 
   return (
-    <div className="border-t border-[#F5E1E4] bg-[#FAF3F4]/30 font-sans">
+    <div className="border-t border-[#FFE4EC] bg-[#FFF7FA] font-sans">
       <div className="px-4 pt-3 pb-1">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#D98897]">Metode Pembayaran</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-[#F7477B]">Metode Pembayaran</p>
       </div>
       <div className="px-4 pb-3">
-        <div className="bg-[#FAF3F4] rounded-xl p-1 border border-[#F5E1E4] flex gap-1 relative overflow-hidden">
+        <div className="bg-[#FFF0F5] rounded-xl p-1 border border-[#FFE4EC] flex gap-1 relative overflow-hidden">
           {paymentTabs.map((tab) => {
             const isActive = paymentMethod === tab.id;
             return (
@@ -35,8 +35,8 @@ export default function PaymentSelector({
                 onClick={() => setPaymentMethod(tab.id)}
                 className={`flex-1 min-h-[40px] py-2 text-xs font-bold uppercase rounded-lg transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer border-none ${
                   isActive
-                    ? 'bg-white shadow-premium-sm text-[#6B3A44]'
-                    : 'bg-transparent text-zinc-500 hover:bg-white/40'
+                    ? 'bg-[#F7477B] shadow-[0_4px_14px_rgba(247,71,123,0.30)] text-white'
+                    : 'bg-transparent text-gray-400 hover:bg-white/60 hover:text-[#C0365A]'
                 }`}
               >
                 {tab.icon}

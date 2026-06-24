@@ -73,14 +73,14 @@ export default function CartPanel({
   };
 
   return (
-    <aside className="w-full lg:w-[420px] flex-shrink-0 flex flex-col h-[calc(100vh-140px)] bg-white border border-[#F5E1E4] rounded-2xl shadow-premium-md overflow-hidden font-sans">
+    <aside className="w-full lg:w-[420px] flex-shrink-0 flex flex-col h-[calc(100vh-140px)] bg-white border border-[#FFE4EC] rounded-2xl shadow-[0_8px_24px_rgba(247,71,123,0.08)] overflow-hidden font-sans">
       
       {/* Customer Header Selector */}
-      <div className="p-4 border-b border-[#F5E1E4] bg-white space-y-3">
+      <div className="p-4 border-b border-[#FFE4EC] bg-white space-y-3">
         {CHECKOUT_V2_ENABLED ? (
-          <div className="p-3.5 bg-[#FDF4F5] border border-[#F5E1E4] rounded-xl flex items-start gap-2.5 shadow-premium-sm">
-            <Info className="w-4 h-4 text-[#D98897] mt-0.5 flex-shrink-0" />
-            <span className="text-[10px] font-bold text-[#6B3A44] leading-relaxed">
+          <div className="p-3 bg-[#FFF0F5] border border-[#FFE4EC] rounded-xl flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-[#F7477B] mt-0.5 flex-shrink-0" />
+            <span className="text-[10px] font-semibold text-[#C0365A] leading-relaxed">
               Checkout Cepat Aktif — Data pelanggan dapat ditambahkan setelah transaksi selesai.
             </span>
           </div>
@@ -88,11 +88,11 @@ export default function CartPanel({
           <div className="flex justify-between items-center">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-sm font-bold text-[#6B3A44] truncate">{activeCustomer.name}</h3>
+                <h3 className="text-sm font-bold text-[#C0365A] truncate">{activeCustomer.name}</h3>
                 <select
                   value={selectedCustomerId}
                   onChange={(e) => setSelectedCustomerId(e.target.value)}
-                  className="text-[10px] font-bold bg-[#FAF3F4] px-2 py-1 rounded-xl border border-[#F5E1E4] text-[#6B3A44] focus:outline-none focus:border-[#D98897] cursor-pointer"
+                  className="text-[10px] font-bold bg-[#FFF0F5] px-2 py-1 rounded-lg border border-[#FFE4EC] text-[#C0365A] focus:outline-none focus:border-[#F7477B] cursor-pointer"
                 >
                   {customers.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -111,20 +111,20 @@ export default function CartPanel({
       <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
         {cart.length > 0 ? (
           cart.map((item) => (
-            <div key={item.treatment.id} className="flex justify-between items-start border-b border-[#F5E1E4]/50 pb-3">
+            <div key={item.treatment.id} className="flex justify-between items-start border-b border-[#FFE4EC]/70 pb-3">
               <div className="flex-1 min-w-0 pr-2">
-                <h4 className="text-xs font-bold text-[#6B3A44] truncate leading-normal">{item.treatment.nama_layanan}</h4>
-                <p className="text-[10px] text-zinc-500 mt-1 font-semibold">
+                <h4 className="text-xs font-bold text-gray-800 truncate leading-normal">{item.treatment.nama_layanan}</h4>
+                <p className="text-[10px] text-gray-400 mt-1 font-semibold">
                   {item.quantity} x Rp {item.treatment.harga_jual.toLocaleString('id-ID')}
                 </p>
               </div>
               <div className="text-right flex flex-col items-end flex-shrink-0 ml-2">
-                <span className="text-xs font-bold text-[#6B3A44] font-mono">
+                <span className="text-xs font-bold text-[#C0365A] font-mono">
                   Rp {(item.treatment.harga_jual * item.quantity).toLocaleString('id-ID')}
                 </span>
                 <button
                   onClick={() => removeFromCart(item.treatment.id)}
-                  className="text-[#C85C5C] mt-2 opacity-70 hover:opacity-100 transition-opacity p-1.5 hover:bg-[#FAF3F4] rounded-xl cursor-pointer"
+                  className="text-red-400 mt-2 opacity-70 hover:opacity-100 transition-opacity p-1.5 hover:bg-rose-50 rounded-xl cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -133,13 +133,13 @@ export default function CartPanel({
           ))
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3.5">
-            <div className="w-12 h-12 rounded-full bg-[#FFF0F2] flex items-center justify-center text-[#D98897] animate-pulse">
+            <div className="w-12 h-12 rounded-2xl bg-[#FFF0F5] flex items-center justify-center text-[#F7477B] animate-pulse">
               <ShoppingBag className="w-5 h-5" />
             </div>
             <div className="max-w-[200px]">
-              <span className="font-bold text-[#6B3A44] block text-xs">Ledger Kosong</span>
-              <span className="text-[10px] text-zinc-400 font-semibold block mt-1 leading-relaxed">
-                Pilih layanan kecantikan di sebelah kiri untuk menambah pesanan ke dalam keranjang.
+              <span className="font-bold text-[#C0365A] block text-xs">Keranjang Kosong</span>
+              <span className="text-[10px] text-gray-400 font-medium block mt-1 leading-relaxed">
+                Pilih layanan dari katalog di sebelah kiri untuk menambah ke keranjang.
               </span>
             </div>
           </div>
@@ -147,22 +147,22 @@ export default function CartPanel({
       </div>
 
       {/* Pricing Summary */}
-      <div className="p-4 bg-[#FAF3F4]/50 border-t border-[#F5E1E4] space-y-2 text-xs font-semibold text-[#6B3A44]">
+      <div className="p-4 bg-[#FFF7FA] border-t border-[#FFE4EC] space-y-2 text-xs font-semibold">
         <div className="flex justify-between items-center">
-          <span className="text-zinc-500 font-normal">Subtotal</span>
-          <span className="font-bold font-mono">Rp {subtotal.toLocaleString('id-ID')}</span>
+          <span className="text-gray-400 font-normal">Subtotal</span>
+          <span className="font-bold font-mono text-gray-700">Rp {subtotal.toLocaleString('id-ID')}</span>
         </div>
         {discountAmount > 0 && activeDiscount && (
-          <div className="flex justify-between items-center text-[#4F8A6B]">
+          <div className="flex justify-between items-center text-green-600">
             <span className="font-normal">
               Diskon ({activeDiscount.nama})
             </span>
             <span className="font-bold font-mono">- Rp {discountAmount.toLocaleString('id-ID')}</span>
           </div>
         )}
-        <div className="pt-2.5 border-t border-[#F5E1E4] flex justify-between items-center">
-          <span className="text-sm font-bold text-[#6B3A44]">Grand Total</span>
-          <span className="text-sm font-bold text-[#6B3A44] font-mono">Rp {grandTotal.toLocaleString('id-ID')}</span>
+        <div className="pt-2.5 border-t border-[#FFE4EC] flex justify-between items-center">
+          <span className="text-sm font-extrabold text-[#C0365A]">Grand Total</span>
+          <span className="text-sm font-extrabold text-[#C0365A] font-mono">Rp {grandTotal.toLocaleString('id-ID')}</span>
         </div>
       </div>
 
@@ -291,13 +291,13 @@ export default function CartPanel({
           onClick={handleCheckout}
           disabled={isCheckoutDisabled}
           id="checkout-btn"
-          className={`w-full py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs shadow-premium-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`w-full py-3.5 rounded-full font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
             isCheckoutDisabled
-              ? 'bg-[#FAF3F4] text-zinc-300 border border-[#F5E1E4] cursor-not-allowed opacity-50 shadow-none'
-              : 'bg-[#D98897] text-white hover:bg-[#6B3A44] hover:shadow-premium-md'
+              ? 'bg-gray-100 text-gray-300 border border-gray-200 cursor-not-allowed opacity-50 shadow-none'
+              : 'bg-[#F7477B] text-white hover:bg-[#C0365A] shadow-[0_4px_20px_rgba(247,71,123,0.35)] hover:shadow-[0_6px_28px_rgba(247,71,123,0.45)] hover:-translate-y-0.5 active:translate-y-0'
           }`}
         >
-          <FileText className="w-4.5 h-4.5 flex-shrink-0" />
+          <FileText className="w-4 h-4 flex-shrink-0" />
           Checkout &amp; Print Struk
         </button>
         {hasPendingClose ? (
