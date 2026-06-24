@@ -443,7 +443,7 @@ export default function CustomerDBView({ customers, onAddCustomer, onEditCustome
           />
 
           {/* Drawer Panel */}
-          <div className="relative w-full max-w-[460px] h-full bg-white shadow-premium-lg flex flex-col border-l border-[#F5E1E4] z-10 rounded-l-3xl overflow-hidden">
+          <div className="relative w-full md:max-w-[460px] h-full bg-white shadow-premium-lg flex flex-col border-l border-[#F5E1E4] z-10 rounded-t-3xl md:rounded-t-none md:rounded-l-3xl overflow-hidden">
             {/* Drawer Header */}
             <div className="px-8 py-6 border-b border-[#F5E1E4] flex justify-between items-center bg-[#FAF3F4]/20">
               <h3 className="text-base font-bold text-[#6B3A44] flex items-center gap-2">

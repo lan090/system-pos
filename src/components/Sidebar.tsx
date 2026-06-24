@@ -56,7 +56,7 @@ export default function Sidebar({
     : 'bg-gray-50 text-gray-500 border border-gray-200';
 
   return (
-    <aside className="bg-white border-r border-[#FFE4EC] shadow-premium-sm h-screen w-[260px] fixed left-0 top-0 flex flex-col z-40 font-sans">
+    <aside className="hidden md:flex flex-col bg-white border-r border-[#FFE4EC] shadow-premium-sm h-screen w-[260px] fixed left-0 top-0 z-40 font-sans">
       
       {/* ── HEADER ── */}
       <div className="px-5 pt-6 pb-4 border-b border-[#FFE4EC]">

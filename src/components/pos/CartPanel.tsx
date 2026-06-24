@@ -73,7 +73,7 @@ export default function CartPanel({
   };
 
   return (
-    <aside className="w-full lg:w-[420px] flex-shrink-0 flex flex-col h-[calc(100vh-140px)] bg-white border border-[#FFE4EC] rounded-2xl shadow-[0_8px_24px_rgba(247,71,123,0.08)] overflow-hidden font-sans">
+    <aside className="w-full lg:w-[420px] flex-shrink-0 flex flex-col h-full lg:h-[calc(100vh-140px)] bg-white border border-[#FFE4EC] rounded-2xl shadow-[0_8px_24px_rgba(247,71,123,0.08)] overflow-hidden font-sans">
       
       {/* Customer Header Selector */}
       <div className="p-4 border-b border-[#FFE4EC] bg-white space-y-3">

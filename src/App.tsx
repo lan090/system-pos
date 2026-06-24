@@ -15,7 +15,14 @@ import {
   Sliders,
   AlertCircle,
   CheckCircle,
-  Users
+  Users,
+  ShoppingBag,
+  Calendar,
+  Menu,
+  LayoutDashboard,
+  Bookmark,
+  LogOut,
+  Settings
 } from 'lucide-react';
 
 import Sidebar from './components/Sidebar';
@@ -107,6 +114,16 @@ export default function App() {
   const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState('pos');
   const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   // Derived quarantinedCount from useDashboardData hook
 
   // =========================================================================
@@ -1220,7 +1237,7 @@ export default function App() {
       />
 
       {/* Main Content Workspace viewport */}
-      <main className="ml-[260px] flex-1 flex flex-col h-screen bg-[#FAF6F6] relative z-0">
+      <main className={`${isMobile ? 'ml-0 pb-20' : 'ml-[260px]'} flex-1 flex flex-col h-screen bg-[#FAF6F6] relative z-0`}>
         
         {hardFailure && (
           <div className="bg-rose-700 text-white font-semibold text-xs px-10 py-3 flex items-center justify-between shadow-md select-none z-20">
@@ -1632,6 +1649,102 @@ export default function App() {
                 className="bg-[#D98897] text-white font-bold px-4 py-2 rounded-lg text-xs hover:opacity-90 cursor-pointer"
               >
                 Tutup Viewer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#F2C6CE] flex justify-around items-center z-40 shadow-lg px-2">
+          <button 
+            onClick={() => { setCurrentTab('pos'); setIsMobileMenuOpen(false); }}
+            className={`flex flex-col items-center justify-center flex-1 py-1 ${currentTab === 'pos' && !isMobileMenuOpen ? 'text-[#C0365A] font-bold' : 'text-gray-400'}`}
+          >
+            <ShoppingBag className="w-5 h-5" />
+            <span className="text-[10px] mt-0.5">Terminal POS</span>
+          </button>
+          <button 
+            onClick={() => { setCurrentTab('appointments'); setIsMobileMenuOpen(false); }}
+            className={`flex flex-col items-center justify-center flex-1 py-1 ${currentTab === 'appointments' && !isMobileMenuOpen ? 'text-[#C0365A] font-bold' : 'text-gray-400'}`}
+          >
+            <Calendar className="w-5 h-5" />
+            <span className="text-[10px] mt-0.5">Janji Temu</span>
+          </button>
+          <button 
+            onClick={() => { setCurrentTab('customers'); setIsMobileMenuOpen(false); }}
+            className={`flex flex-col items-center justify-center flex-1 py-1 ${currentTab === 'customers' && !isMobileMenuOpen ? 'text-[#C0365A] font-bold' : 'text-gray-400'}`}
+          >
+            <Users className="w-5 h-5" />
+            <span className="text-[10px] mt-0.5">Pelanggan</span>
+          </button>
+          <button 
+            onClick={() => setIsMobileMenuOpen(true)}
+            className={`flex flex-col items-center justify-center flex-1 py-1 ${isMobileMenuOpen ? 'text-[#C0365A] font-bold' : 'text-gray-400'}`}
+          >
+            <Menu className="w-5 h-5" />
+            <span className="text-[10px] mt-0.5">Lainnya</span>
+          </button>
+        </div>
+      )}
+
+      {/* Drawer Menu Lainnya */}
+      {isMobile && isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-xs">
+          <div className="absolute inset-0" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="relative bg-white rounded-t-3xl p-6 shadow-2xl max-h-[70vh] overflow-y-auto space-y-5">
+            <div className="flex justify-between items-center pb-2 border-b border-[#FFE4EC]">
+              <h3 className="text-sm font-bold text-[#6B3A44] uppercase tracking-wider">AuraDesk Menu</h3>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="text-zinc-400 hover:text-zinc-600 font-bold p-1">✕</button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              {userRole === 'Owner/Manager' && (
+                <button 
+                  onClick={() => { setCurrentTab('dashboard'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-3 p-3.5 border rounded-2xl ${currentTab === 'dashboard' ? 'bg-[#FFF0F5] border-[#F2C6CE] text-[#C0365A] font-bold' : 'border-zinc-100 text-zinc-600 hover:bg-zinc-50'}`}
+                >
+                  <LayoutDashboard className="w-4 h-4 text-[#F7477B]" />
+                  <span>Dashboard</span>
+                </button>
+              )}
+              <button 
+                onClick={() => { setCurrentTab('catalog'); setIsMobileMenuOpen(false); }}
+                className={`flex items-center gap-3 p-3.5 border rounded-2xl ${currentTab === 'catalog' ? 'bg-[#FFF0F5] border-[#F2C6CE] text-[#C0365A] font-bold' : 'border-zinc-100 text-zinc-600 hover:bg-zinc-50'}`}
+              >
+                <Bookmark className="w-4 h-4 text-[#F7477B]" />
+                <span>Katalog Layanan</span>
+              </button>
+              {userRole === 'Owner/Manager' && (
+                <button 
+                  onClick={() => { setCurrentTab('users'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-3 p-3.5 border rounded-2xl ${currentTab === 'users' ? 'bg-[#FFF0F5] border-[#F2C6CE] text-[#C0365A] font-bold' : 'border-zinc-100 text-zinc-600 hover:bg-zinc-50'}`}
+                >
+                  <Users className="w-4 h-4 text-[#F7477B]" />
+                  <span>Manajemen Staf</span>
+                </button>
+              )}
+              <button 
+                onClick={() => { setCurrentTab('settings'); setIsMobileMenuOpen(false); }}
+                className={`flex items-center gap-3 p-3.5 border rounded-2xl ${currentTab === 'settings' ? 'bg-[#FFF0F5] border-[#F2C6CE] text-[#C0365A] font-bold' : 'border-zinc-100 text-zinc-600 hover:bg-zinc-50'}`}
+              >
+                <Settings className="w-4 h-4 text-[#F7477B]" />
+                <span>Pengaturan</span>
+              </button>
+            </div>
+
+            <div className="border-t border-[#FFE4EC] pt-4 flex flex-col gap-3.5">
+              <div className="flex items-center gap-3 bg-[#FFF7FA] p-3 rounded-2xl border border-[#FFE4EC]">
+                <div className="w-8 h-8 rounded-lg bg-[#F7477B] flex items-center justify-center text-white"><User className="w-4 h-4" /></div>
+                <div>
+                  <span className="text-xs font-bold text-[#C0365A] block leading-tight">{currentUser.nama_lengkap}</span>
+                  <span className="text-[9px] font-bold text-gray-400 block uppercase mt-0.5">{userRole}</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                className="w-full py-3 bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold rounded-2xl text-xs flex justify-center items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Keluar Sistem
               </button>
             </div>
           </div>

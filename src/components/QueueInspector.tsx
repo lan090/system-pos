@@ -257,7 +257,7 @@ export default function QueueInspector({ userRole = 'Kasir/Front Desk' }: { user
         {activeTab === 'active' && (
           <div className="space-y-4">
             {activeQueue.length > 0 ? (
-              <div className="border border-[#F5E1E4] rounded-xl overflow-hidden max-h-80 overflow-y-auto shadow-premium-sm">
+              <div className="border border-[#F5E1E4] rounded-xl overflow-x-auto overflow-y-auto max-h-80 shadow-premium-sm">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-[#FAF3F4]/10 border-b border-[#F5E1E4] text-zinc-400 font-bold uppercase tracking-wider text-[9px]">

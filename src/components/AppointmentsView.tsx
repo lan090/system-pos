@@ -103,6 +103,15 @@ export default function AppointmentsView({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedAppIdForAction, setSelectedAppIdForAction] = useState<string | null>(null);
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const [selectedTherapistId, setSelectedTherapistId] = useState<string>('ALL');
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Resolve active therapist list: prefer prop from DB, fall back to defaults
   const activeTherapists = useMemo(() => {
     const list = therapistList && therapistList.length > 0 ? therapistList : DEFAULT_THERAPISTS;
@@ -333,6 +342,92 @@ export default function AppointmentsView({
             </p>
           </div>
         </div>
+      ) : isMobile ? (
+        <div className="space-y-4">
+          {/* 1. Swiper Terapis Horizontal */}
+          <div className="flex overflow-x-auto gap-2 p-3 bg-white border border-[#F5E1E4] rounded-2xl shadow-sm no-scrollbar scroll-smooth">
+            <button 
+              type="button"
+              onClick={() => setSelectedTherapistId('ALL')}
+              className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex-shrink-0 cursor-pointer ${
+                selectedTherapistId === 'ALL' 
+                  ? 'bg-[#D98897] text-white shadow-sm' 
+                  : 'bg-[#FAF3F4] text-[#6B3A44] border border-[#F5E1E4]/50'
+              }`}
+            >
+              Semua Terapis
+            </button>
+            {activeTherapists.map(t => (
+              <button 
+                type="button"
+                key={t.id}
+                onClick={() => setSelectedTherapistId(t.id)}
+                className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex-shrink-0 cursor-pointer ${
+                  selectedTherapistId === t.id 
+                    ? 'bg-[#D98897] text-white shadow-sm' 
+                    : 'bg-[#FAF3F4] text-[#6B3A44] border border-[#F5E1E4]/50'
+                }`}
+              >
+                {t.nama}
+              </button>
+            ))}
+          </div>
+
+          {/* 2. Timeline Jam Kerja Vertikal */}
+          <div className="bg-white border border-[#F5E1E4] rounded-2xl shadow-md p-4 space-y-3 max-h-[600px] overflow-y-auto">
+            {hours.map((hour) => {
+              const matchedApps = dynamicAppointments.filter(app => {
+                const matchesTime = app.timeSlot === hour;
+                const matchesTherapist = selectedTherapistId === 'ALL' || app.therapistId === selectedTherapistId;
+                return matchesTime && matchesTherapist;
+              });
+
+              return (
+                <div key={hour} className="flex gap-4 items-start py-2.5 border-b border-zinc-100 last:border-0">
+                  <span className="w-12 text-xs font-mono font-bold text-[#6B3A44] pt-1">{hour}</span>
+                  <div className="flex-1 space-y-2">
+                    {matchedApps.length > 0 ? (
+                      matchedApps.map(app => {
+                        const catStyle = getPastelColor(app.category);
+                        return (
+                          <div 
+                            key={app.id}
+                            onClick={() => setSelectedAppIdForAction(app.id)}
+                            className={`p-3.5 rounded-xl border-l-[3px] border ${catStyle.border} ${catStyle.borderLeft} ${catStyle.bg} cursor-pointer hover:shadow-sm`}
+                          >
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-[#6B3A44]">{app.treatmentName}</span>
+                              <span className="text-[9px] font-bold text-gray-400 font-mono uppercase">{app.therapistName}</span>
+                            </div>
+                            <p className="text-[11px] font-bold text-zinc-500 mt-1 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#D98897]"></span>
+                              {app.customerName}
+                            </p>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            timeSlot: hour,
+                            therapistId: selectedTherapistId !== 'ALL' ? selectedTherapistId : (activeTherapists[0]?.id || '')
+                          }));
+                          setIsDrawerOpen(true);
+                        }}
+                        className="w-full py-2.5 border border-dashed border-zinc-200 hover:border-[#D98897] rounded-xl flex items-center justify-center text-[10px] font-semibold text-zinc-400 hover:text-[#D98897] transition-all cursor-pointer"
+                      >
+                        + Tambah Slot {hour}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       ) : (
         <div className="bg-white border border-[#F5E1E4] rounded-2xl shadow-premium-md overflow-hidden">
           {/* Matrix Header (X-Axis Resources) */}
@@ -444,7 +539,7 @@ export default function AppointmentsView({
             onClick={() => setIsDrawerOpen(false)}
           />
 
-          <div className="relative w-full max-w-[460px] h-full bg-white shadow-premium-lg flex flex-col border-l border-[#F5E1E4] z-10 rounded-l-3xl overflow-hidden">
+          <div className="relative w-full md:max-w-[460px] h-full bg-white shadow-premium-lg flex flex-col border-l border-[#F5E1E4] z-10 rounded-t-3xl md:rounded-t-none md:rounded-l-3xl overflow-hidden">
             {/* Header */}
             <div className="px-8 py-6 border-b border-[#F5E1E4] flex justify-between items-center bg-[#FAF3F4]/20">
               <h3 className="text-base font-bold text-[#6B3A44] flex items-center gap-2">

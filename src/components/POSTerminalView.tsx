@@ -34,6 +34,7 @@ interface POSTerminalViewProps {
   };
   isAuthReady: boolean;
   offlineQueue?: any[];
+  isMobile?: boolean;
 }
 
 const MEANINGLESS_INPUTS = ['', '.', '-', 'test', 'xxx', 'asdf', '0', '00', 'n/a'];
@@ -56,12 +57,14 @@ export default function POSTerminalView({
   currentUser,
   isAuthReady,
   offlineQueue = [],
+  isMobile = false,
 }: POSTerminalViewProps) {
   const cleanCashierId = (currentUser?.id && currentUser.id !== 'undefined' && currentUser.id !== 'null' && currentUser.id.trim() !== '')
     ? currentUser.id
     : 'd0000000-0000-0000-0000-000000000001';
 
   const CHECKOUT_V2_ENABLED = getFlag('CHECKOUT_V2_ENABLED');
+  const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
   const [checkoutCustomerMode, setCheckoutCustomerMode] = useState<'fast' | 'customer'>('fast');
   const [customerNameInput, setCustomerNameInput] = useState('');
   const [customerPhoneInput, setCustomerPhoneInput] = useState('');
@@ -806,7 +809,7 @@ export default function POSTerminalView({
   }
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-6 h-full max-w-[1280px] mx-auto w-full overflow-hidden bg-[#FAFAFA] font-sans" id="pos-terminal-view">
+    <div className="flex-1 flex flex-col lg:flex-row gap-6 h-full max-w-[1280px] mx-auto w-full overflow-hidden bg-[#FAFAFA] font-sans relative" id="pos-terminal-view">
       
       {/* Print stylesheet */}
       <style dangerouslySetInnerHTML={{
@@ -862,43 +865,116 @@ export default function POSTerminalView({
       />
 
       {/* LEFT COLUMN: Product / Service Catalog */}
-      <ProductCatalog
-        filteredTreatments={filteredTreatments}
-        cart={cart}
-        addToCart={addToCart}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        onOpenCloseShift={() => setIsCloseShiftModalOpen(true)}
-      />
+      <div className="flex-1 overflow-y-auto">
+        <ProductCatalog
+          filteredTreatments={filteredTreatments}
+          cart={cart}
+          addToCart={addToCart}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onOpenCloseShift={() => setIsCloseShiftModalOpen(true)}
+        />
+      </div>
 
-      {/* RIGHT COLUMN: Cart ledger details & execution */}
-      <CartPanel
-        cart={cart}
-        removeFromCart={removeFromCart}
-        subtotal={subtotal}
-        discountAmount={discountAmount}
-        activeDiscount={activeDiscount}
-        grandTotal={grandTotal}
-        activeCustomer={activeCustomer}
-        selectedCustomerId={selectedCustomerId}
-        setSelectedCustomerId={setSelectedCustomerId}
-        customers={customers}
-        CHECKOUT_V2_ENABLED={CHECKOUT_V2_ENABLED}
-        isCheckoutDisabled={isCheckoutDisabled}
-        hasPendingClose={hasPendingClose}
-        requiresOfflineVerification={requiresOfflineVerification}
-        offlineVerificationMode={offlineVerificationMode}
-        setOfflineVerificationMode={setOfflineVerificationMode}
-        senderName={senderName}
-        setSenderName={setSenderName}
-        compressedImageMeta={compressedImageMeta}
-        isCompressing={isCompressing}
-        triggerFileSelect={triggerFileSelect}
-        handleCheckout={handleCheckout}
-        paymentMethod={paymentMethod}
-        setPaymentMethod={setPaymentMethod}
-        isOnline={isOnline}
-      />
+      {/* RIGHT COLUMN: Cart Panel (Statis di desktop, Bottom Sheet di mobile) */}
+      {!isMobile ? (
+        <div className="w-[380px] flex-shrink-0">
+          <CartPanel
+            cart={cart}
+            removeFromCart={removeFromCart}
+            subtotal={subtotal}
+            discountAmount={discountAmount}
+            activeDiscount={activeDiscount}
+            grandTotal={grandTotal}
+            activeCustomer={activeCustomer}
+            selectedCustomerId={selectedCustomerId}
+            setSelectedCustomerId={setSelectedCustomerId}
+            customers={customers}
+            CHECKOUT_V2_ENABLED={CHECKOUT_V2_ENABLED}
+            isCheckoutDisabled={isCheckoutDisabled}
+            hasPendingClose={hasPendingClose}
+            requiresOfflineVerification={requiresOfflineVerification}
+            offlineVerificationMode={offlineVerificationMode}
+            setOfflineVerificationMode={setOfflineVerificationMode}
+            senderName={senderName}
+            setSenderName={setSenderName}
+            compressedImageMeta={compressedImageMeta}
+            isCompressing={isCompressing}
+            triggerFileSelect={triggerFileSelect}
+            handleCheckout={handleCheckout}
+            paymentMethod={paymentMethod}
+            setPaymentMethod={setPaymentMethod}
+            isOnline={isOnline}
+          />
+        </div>
+      ) : (
+        isMobileCartOpen && (
+          <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-xs animate-fade-in">
+            <div className="absolute inset-0" onClick={() => setIsMobileCartOpen(false)} />
+            <div className="relative bg-white rounded-t-3xl shadow-2xl flex flex-col h-[85vh] z-50">
+              <div className="px-6 py-4 border-b border-[#FFE4EC] flex justify-between items-center flex-shrink-0 bg-[#FFF7FA] rounded-t-3xl">
+                <div>
+                  <h3 className="text-sm font-bold text-[#6B3A44] uppercase tracking-wider">Keranjang Belanja</h3>
+                  <span className="text-[10px] text-zinc-400">Total: {cart.length} item layanan</span>
+                </div>
+                <button 
+                  onClick={() => setIsMobileCartOpen(false)} 
+                  className="text-zinc-400 hover:text-[#6B3A44] font-bold p-1 bg-white border border-[#FFE4EC] rounded-full w-8 h-8 flex items-center justify-center shadow-sm cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 pb-20">
+                <CartPanel
+                  cart={cart}
+                  removeFromCart={removeFromCart}
+                  subtotal={subtotal}
+                  discountAmount={discountAmount}
+                  activeDiscount={activeDiscount}
+                  grandTotal={grandTotal}
+                  activeCustomer={activeCustomer}
+                  selectedCustomerId={selectedCustomerId}
+                  setSelectedCustomerId={setSelectedCustomerId}
+                  customers={customers}
+                  CHECKOUT_V2_ENABLED={CHECKOUT_V2_ENABLED}
+                  isCheckoutDisabled={isCheckoutDisabled}
+                  hasPendingClose={hasPendingClose}
+                  requiresOfflineVerification={requiresOfflineVerification}
+                  offlineVerificationMode={offlineVerificationMode}
+                  setOfflineVerificationMode={setOfflineVerificationMode}
+                  senderName={senderName}
+                  setSenderName={setSenderName}
+                  compressedImageMeta={compressedImageMeta}
+                  isCompressing={isCompressing}
+                  triggerFileSelect={triggerFileSelect}
+                  handleCheckout={async () => {
+                    await handleCheckout();
+                    setIsMobileCartOpen(false);
+                  }}
+                  paymentMethod={paymentMethod}
+                  setPaymentMethod={setPaymentMethod}
+                  isOnline={isOnline}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      )}
+
+      {/* Floating Action Button (FAB) Keranjang di Mobile */}
+      {isMobile && cart.length > 0 && !isMobileCartOpen && (
+        <button 
+          onClick={() => setIsMobileCartOpen(true)}
+          className="fixed bottom-20 right-5 z-40 bg-gradient-to-r from-[#F7477B] to-[#C0365A] text-white font-extrabold py-3.5 px-6 rounded-full flex items-center gap-2 shadow-2xl hover:scale-105 active:scale-95 transition-all text-xs uppercase tracking-wider cursor-pointer"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+          </span>
+          <span>Tinjau Keranjang ({cart.length})</span>
+          <span className="font-mono bg-white/20 px-2 py-0.5 rounded-md">Rp {(grandTotal / 1000).toFixed(0)}K</span>
+        </button>
+      )}
 
       {/* Receipt success & thermal printer preview Modal */}
       <ReceiptModal
