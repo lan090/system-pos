@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { 
   TrendingUp, 
+  TrendingDown,
   Wallet, 
   Receipt, 
   MoreHorizontal, 
@@ -31,6 +32,8 @@ interface DashboardViewProps {
   queueCount?: number;
   totalSalesToday?: number;
   successTransactionsCount?: number;
+  yesterdaySales?: number;
+  yesterdayTransactionsCount?: number;
   guestRatio?: number;
   topServices?: Array<{
     name: string;
@@ -101,6 +104,8 @@ export default function DashboardView({
   queueCount = 0,
   totalSalesToday = 0,
   successTransactionsCount = 0,
+  yesterdaySales = 0,
+  yesterdayTransactionsCount = 0,
   guestRatio = 0,
   topServices = [],
   activityData = [],
@@ -140,6 +145,19 @@ export default function DashboardView({
     offlineDeltaSeries = [],
     conflictResolutionLog = []
   } = hybridRevenue;
+
+  // Dynamic Growth Calculations
+  const revenueGrowthPercentage = useMemo(() => {
+    if (yesterdaySales === 0) {
+      return totalSalesToday > 0 ? 100.0 : 0.0;
+    }
+    return ((totalSalesToday - yesterdaySales) / yesterdaySales) * 100;
+  }, [totalSalesToday, yesterdaySales]);
+
+  const transactionGrowthDiff = useMemo(() => {
+    return successTransactionsCount - yesterdayTransactionsCount;
+  }, [successTransactionsCount, yesterdayTransactionsCount]);
+
 
   const [hoveredSlice, setHoveredSlice] = useState<number | null>(null);
   const [isCloseShiftModalOpen, setIsCloseShiftModalOpen] = useState(false);
@@ -493,9 +511,19 @@ export default function DashboardView({
           <div className="text-xl font-extrabold text-[#C0365A] tracking-tight leading-none">
             Rp {totalSalesToday.toLocaleString('id-ID')}
           </div>
-          <span className="text-[10px] font-semibold text-green-600 flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" /> +12.5% dari kemarin
-          </span>
+          {revenueGrowthPercentage > 0 ? (
+            <span className="text-[10px] font-semibold text-green-600 flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5 text-green-600" /> +{revenueGrowthPercentage.toFixed(1)}% dari kemarin
+            </span>
+          ) : revenueGrowthPercentage < 0 ? (
+            <span className="text-[10px] font-semibold text-rose-600 flex items-center gap-1">
+              <TrendingDown className="w-3.5 h-3.5 text-rose-600" /> {revenueGrowthPercentage.toFixed(1)}% dari kemarin
+            </span>
+          ) : (
+            <span className="text-[10px] font-semibold text-zinc-400 flex items-center gap-1">
+              <Activity className="w-3.5 h-3.5 text-zinc-400" /> +0% dari kemarin
+            </span>
+          )}
         </div>
 
         {/* KPI 2: Transaction Count */}
@@ -509,9 +537,19 @@ export default function DashboardView({
           <div className="text-xl font-extrabold text-[#C0365A] tracking-tight leading-none">
             {successTransactionsCount}
           </div>
-          <span className="text-[10px] font-semibold text-[#F7477B] flex items-center gap-1">
-            <Activity className="w-3 h-3" /> +{queueCount} transaksi
-          </span>
+          {transactionGrowthDiff > 0 ? (
+            <span className="text-[10px] font-semibold text-green-600 flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5 text-green-600" /> +{transactionGrowthDiff} kemarin
+            </span>
+          ) : transactionGrowthDiff < 0 ? (
+            <span className="text-[10px] font-semibold text-rose-600 flex items-center gap-1">
+              <TrendingDown className="w-3.5 h-3.5 text-rose-600" /> {transactionGrowthDiff} kemarin
+            </span>
+          ) : (
+            <span className="text-[10px] font-semibold text-zinc-400 flex items-center gap-1">
+              <Activity className="w-3.5 h-3.5 text-zinc-400" /> +0 kemarin
+            </span>
+          )}
         </div>
 
         {/* KPI 3: Average Ticket */}

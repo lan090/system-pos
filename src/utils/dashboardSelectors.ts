@@ -39,9 +39,19 @@ export function isGuestId(id?: string | null): boolean {
 /**
  * Calculates total revenue combining online sales sum and offline queue transactions.
  */
-export function selectRevenue(onlineSum: number, offlineQueue: SelectorOfflineQueueItem[]): number {
+export function selectRevenue(
+  onlineSum: number,
+  offlineQueue: SelectorOfflineQueueItem[],
+  startOfDayStr?: string
+): number {
   const offlineSum = offlineQueue
-    .filter(item => item.type === 'CREATE_TRANSACTION' && item.metadata)
+    .filter(item => {
+      if (item.type !== 'CREATE_TRANSACTION' || !item.metadata) return false;
+      if (!startOfDayStr) return true;
+      const itemTime = item.created_at ? new Date(item.created_at).getTime() : Date.now();
+      const startOfDayTime = new Date(startOfDayStr).getTime();
+      return itemTime >= startOfDayTime;
+    })
     .reduce((sum, item) => sum + (Number(item.metadata?.total_amount) || 0), 0);
   return onlineSum + offlineSum;
 }
@@ -49,10 +59,65 @@ export function selectRevenue(onlineSum: number, offlineQueue: SelectorOfflineQu
 /**
  * Calculates total transaction count combining online count and offline queue count.
  */
-export function selectTransactionCount(onlineCount: number, offlineQueue: SelectorOfflineQueueItem[]): number {
-  const offlineCount = offlineQueue.filter(item => item.type === 'CREATE_TRANSACTION').length;
+export function selectTransactionCount(
+  onlineCount: number,
+  offlineQueue: SelectorOfflineQueueItem[],
+  startOfDayStr?: string
+): number {
+  const offlineCount = offlineQueue.filter(item => {
+    if (item.type !== 'CREATE_TRANSACTION') return false;
+    if (!startOfDayStr) return true;
+    const itemTime = item.created_at ? new Date(item.created_at).getTime() : Date.now();
+    const startOfDayTime = new Date(startOfDayStr).getTime();
+    return itemTime >= startOfDayTime;
+  }).length;
   return onlineCount + offlineCount;
 }
+
+/**
+ * Calculates yesterday's revenue.
+ */
+export function selectYesterdayRevenue(
+  onlineYesterdaySum: number,
+  offlineQueue: SelectorOfflineQueueItem[],
+  startOfYesterdayStr: string,
+  startOfDayStr: string
+): number {
+  const startOfYesterdayTime = new Date(startOfYesterdayStr).getTime();
+  const startOfDayTime = new Date(startOfDayStr).getTime();
+  
+  const offlineSum = offlineQueue
+    .filter(item => {
+      if (item.type !== 'CREATE_TRANSACTION' || !item.metadata) return false;
+      const itemTime = item.created_at ? new Date(item.created_at).getTime() : 0;
+      return itemTime >= startOfYesterdayTime && itemTime < startOfDayTime;
+    })
+    .reduce((sum, item) => sum + (Number(item.metadata?.total_amount) || 0), 0);
+    
+  return onlineYesterdaySum + offlineSum;
+}
+
+/**
+ * Calculates yesterday's transaction count.
+ */
+export function selectYesterdayTransactionCount(
+  onlineYesterdayCount: number,
+  offlineQueue: SelectorOfflineQueueItem[],
+  startOfYesterdayStr: string,
+  startOfDayStr: string
+): number {
+  const startOfYesterdayTime = new Date(startOfYesterdayStr).getTime();
+  const startOfDayTime = new Date(startOfDayStr).getTime();
+  
+  const offlineCount = offlineQueue.filter(item => {
+    if (item.type !== 'CREATE_TRANSACTION') return false;
+    const itemTime = item.created_at ? new Date(item.created_at).getTime() : 0;
+    return itemTime >= startOfYesterdayTime && itemTime < startOfDayTime;
+  }).length;
+  
+  return onlineYesterdayCount + offlineCount;
+}
+
 
 /**
  * Calculates average ticket size.

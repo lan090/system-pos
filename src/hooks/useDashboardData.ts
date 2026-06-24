@@ -13,6 +13,18 @@ const getAsiaJakartaStartOfDay = () => {
   return `${y}-${m}-${d}T00:00:00+07:00`;
 };
 
+const getAsiaJakartaYesterdayStart = (todayStartStr: string) => {
+  const todayDate = new Date(todayStartStr);
+  const yesterdayDate = new Date(todayDate.getTime() - 24 * 60 * 60 * 1000);
+  const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' });
+  const parts = formatter.formatToParts(yesterdayDate);
+  const m = parts.find(p => p.type === 'month')!.value;
+  const d = parts.find(p => p.type === 'day')!.value;
+  const y = parts.find(p => p.type === 'year')!.value;
+  return `${y}-${m}-${d}T00:00:00+07:00`;
+};
+
+
 export function useDashboardData(isOnline: boolean, userRole: string) {
   const [offlineQueue, setOfflineQueue] = useState<any[]>([]);
   const [quarantinedCount, setQuarantinedCount] = useState<number>(0);
@@ -103,10 +115,10 @@ export function useDashboardData(isOnline: boolean, userRole: string) {
       const { supabase, isSupabaseReady } = await import('../lib/supabaseClient');
       if (!isSupabaseReady) throw new Error('Supabase credentials not ready');
       const startOfDay = getAsiaJakartaStartOfDay();
-      const startOfDayTime = new Date(startOfDay).getTime();
+      const startOfYesterday = getAsiaJakartaYesterdayStart(startOfDay);
 
-      // Query 1: Today's transactions (fast-path)
-      const { data: todayTxs, error: todayError } = await supabase
+      // Query 1: Today's and Yesterday's transactions (fast-path)
+      const { data: allTxs, error: txsError } = await supabase
         .from('transactions')
         .select(`
           id, 
@@ -119,9 +131,12 @@ export function useDashboardData(isOnline: boolean, userRole: string) {
           )
         `)
         .eq('status', 'Done')
-        .gte('created_at', startOfDay);
+        .gte('created_at', startOfYesterday);
         
-      if (todayError) throw todayError;
+      if (txsError) throw txsError;
+
+      const todayTxs = allTxs?.filter((tx: any) => tx.created_at && tx.created_at >= startOfDay) || [];
+      const yesterdayTxs = allTxs?.filter((tx: any) => tx.created_at && tx.created_at >= startOfYesterday && tx.created_at < startOfDay) || [];
 
       // Query 2: Historical daily revenue aggregates
       let serverRevenue: Array<{ date: string; total: number }> = [];
@@ -162,8 +177,11 @@ export function useDashboardData(isOnline: boolean, userRole: string) {
         })).sort((a, b) => a.date.localeCompare(b.date));
       }
       
-      let count = todayTxs?.length || 0;
-      let sum = todayTxs?.reduce((acc, curr) => acc + Number(curr.total_amount), 0) || 0;
+      let count = todayTxs.length;
+      let sum = todayTxs.reduce((acc, curr) => acc + Number(curr.total_amount), 0);
+      let yesterdayCount = yesterdayTxs.length;
+      let yesterdaySum = yesterdayTxs.reduce((acc, curr) => acc + Number(curr.total_amount), 0);
+      
       const serviceCounts: Record<string, number> = {};
       const hourlyActivity: Record<string, { value: number, amount: number }> = {};
       
@@ -184,10 +202,12 @@ export function useDashboardData(isOnline: boolean, userRole: string) {
       });
 
       return {
-        rawTxs: todayTxs || [],
+        rawTxs: todayTxs,
         serverRevenue,
         count,
         sum,
+        yesterdayCount,
+        yesterdaySum,
         serviceCounts,
         hourlyActivity
       };
@@ -207,6 +227,8 @@ export function useDashboardData(isOnline: boolean, userRole: string) {
       serverRevenue: [],
       count: 0,
       sum: 0,
+      yesterdayCount: 0,
+      yesterdaySum: 0,
       serviceCounts: {},
       hourlyActivity: {}
     },

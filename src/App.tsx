@@ -39,6 +39,8 @@ import { useDashboardData } from './hooks/useDashboardData';
 import {
   selectRevenue,
   selectTransactionCount,
+  selectYesterdayRevenue,
+  selectYesterdayTransactionCount,
   selectGuestRatio,
   selectSyncStatus,
   selectTopServices,
@@ -80,6 +82,18 @@ const getAsiaJakartaStartOfDay = () => {
   const y = parts.find(p => p.type === 'year')!.value;
   return `${y}-${m}-${d}T00:00:00+07:00`;
 };
+
+const getAsiaJakartaYesterdayStart = (todayStartStr: string) => {
+  const todayDate = new Date(todayStartStr);
+  const yesterdayDate = new Date(todayDate.getTime() - 24 * 60 * 60 * 1000);
+  const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' });
+  const parts = formatter.formatToParts(yesterdayDate);
+  const m = parts.find(p => p.type === 'month')!.value;
+  const d = parts.find(p => p.type === 'day')!.value;
+  const y = parts.find(p => p.type === 'year')!.value;
+  return `${y}-${m}-${d}T00:00:00+07:00`;
+};
+
 
 
 export default function App() {
@@ -437,8 +451,15 @@ export default function App() {
   };
 
   // Derived state from useDashboardData and selectors
-  const totalSalesToday = useMemo(() => selectRevenue(onlineSalesData.sum, offlineQueue), [onlineSalesData.sum, offlineQueue]);
-  const successTransactionsCount = useMemo(() => selectTransactionCount(onlineSalesData.count, offlineQueue), [onlineSalesData.count, offlineQueue]);
+  const startOfDay = useMemo(() => getAsiaJakartaStartOfDay(), []);
+  const startOfYesterday = useMemo(() => getAsiaJakartaYesterdayStart(startOfDay), [startOfDay]);
+
+  const totalSalesToday = useMemo(() => selectRevenue(onlineSalesData.sum, offlineQueue, startOfDay), [onlineSalesData.sum, offlineQueue, startOfDay]);
+  const successTransactionsCount = useMemo(() => selectTransactionCount(onlineSalesData.count, offlineQueue, startOfDay), [onlineSalesData.count, offlineQueue, startOfDay]);
+
+  const yesterdaySales = useMemo(() => selectYesterdayRevenue(onlineSalesData.yesterdaySum || 0, offlineQueue, startOfYesterday, startOfDay), [onlineSalesData.yesterdaySum, offlineQueue, startOfYesterday, startOfDay]);
+  const yesterdayTransactionsCount = useMemo(() => selectYesterdayTransactionCount(onlineSalesData.yesterdayCount || 0, offlineQueue, startOfYesterday, startOfDay), [onlineSalesData.yesterdayCount, offlineQueue, startOfYesterday, startOfDay]);
+
   const guestRatio = useMemo(() => selectGuestRatio(onlineSalesData.rawTxs, offlineQueue), [onlineSalesData.rawTxs, offlineQueue]);
   const topServices = useMemo(() => selectTopServices(onlineSalesData.serviceCounts, offlineQueue, treatments), [onlineSalesData.serviceCounts, offlineQueue, treatments]);
 
@@ -1362,6 +1383,8 @@ export default function App() {
                   queueCount={pendingSyncCount} 
                   totalSalesToday={totalSalesToday}
                   successTransactionsCount={successTransactionsCount}
+                  yesterdaySales={yesterdaySales}
+                  yesterdayTransactionsCount={yesterdayTransactionsCount}
                   guestRatio={guestRatio}
                   topServices={topServices}
                   activityData={activityData}
