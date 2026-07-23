@@ -24,8 +24,7 @@ import {
   LogOut,
   Settings,
   Download,
-  Smartphone,
-  MonitorPlay
+  Smartphone
 } from 'lucide-react';
 
 import Sidebar from './components/Sidebar';
