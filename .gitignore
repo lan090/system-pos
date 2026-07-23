@@ -7,10 +7,20 @@ coverage/
 .env*
 !.env.example
 .superpowers/
-
-
-.vercel
+.vercel/
 scratch/
 test-results/
 playwright-report/
 supabase/.temp/
+
+# Internal agent skills, dev tools & client specs
+.agents/
+Buku_Panduan_Client.md
+ERD.md
+FRD.md
+audit/
+clear_idb.html
+fix_supabase.sh
+reset_database.sql
+sync-db.cjs
+New folder/
