@@ -29,10 +29,16 @@ export default function ServiceCatalogView({ treatments, onAddTreatment, onDelet
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Form states
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    nama_layanan: string;
+    kategori: string;
+    harga_jual: number | '';
+    duration: number;
+    description: string;
+  }>({
     nama_layanan: '',
     kategori: 'Hair Care',
-    harga_jual: 0,
+    harga_jual: '',
     duration: 60,
     description: ''
   });
@@ -45,12 +51,15 @@ export default function ServiceCatalogView({ treatments, onAddTreatment, onDelet
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'harga_jual' || name === 'duration' ? Number(value) : value
+      [name]: name === 'harga_jual' || name === 'duration' 
+        ? (value === '' ? '' : Number(value)) 
+        : value
     }));
   };
 
   // Check validation error
-  const isPriceInvalid = formData.harga_jual <= 0;
+  const isPriceInvalid = formData.harga_jual === '' || Number(formData.harga_jual) <= 0;
+  const showPriceError = formData.harga_jual !== '' && Number(formData.harga_jual) <= 0;
 
   // Search & Filter Memo
   const filteredTreatments = useMemo(() => {
@@ -71,7 +80,7 @@ export default function ServiceCatalogView({ treatments, onAddTreatment, onDelet
       id: crypto.randomUUID(),
       nama_layanan: formData.nama_layanan || 'Signature Treatment',
       kategori: formData.kategori,
-      harga_jual: formData.harga_jual,
+      harga_jual: Number(formData.harga_jual),
       description: formData.description || 'Premium treatment service.',
       availableOffline: true,
       icon: formData.kategori === 'Hair Care' ? 'content_cut' : formData.kategori === 'Reflexology' ? 'spa' : 'face'
@@ -86,7 +95,7 @@ export default function ServiceCatalogView({ treatments, onAddTreatment, onDelet
       setFormData({
         nama_layanan: '',
         kategori: 'Hair Care',
-        harga_jual: 0,
+        harga_jual: '',
         duration: 60,
         description: ''
       });
@@ -104,7 +113,7 @@ export default function ServiceCatalogView({ treatments, onAddTreatment, onDelet
     setFormData({
       nama_layanan: '',
       kategori: 'Hair Care',
-      harga_jual: 0,
+      harga_jual: '',
       duration: 60,
       description: ''
     });
@@ -287,7 +296,7 @@ export default function ServiceCatalogView({ treatments, onAddTreatment, onDelet
 
                 {/* Field: Price */}
                 <div className="space-y-1.5 relative">
-                  <label className={`block text-[10px] font-bold uppercase tracking-wider ${isPriceInvalid ? 'text-red-500' : 'text-[#6B3A44]'}`}>
+                  <label className={`block text-[10px] font-bold uppercase tracking-wider ${showPriceError ? 'text-red-500' : 'text-[#6B3A44]'}`}>
                     Harga Jual (IDR) *
                   </label>
                   <div className="relative">
@@ -296,21 +305,22 @@ export default function ServiceCatalogView({ treatments, onAddTreatment, onDelet
                       type="number"
                       name="harga_jual"
                       required
+                      placeholder="0"
                       value={formData.harga_jual}
                       onChange={handleInputChange}
                       className={`w-full rounded-xl pl-10 pr-10 py-3 text-xs font-semibold focus:outline-none transition-all ${
-                        isPriceInvalid 
+                        showPriceError 
                           ? 'bg-red-50/50 border-2 border-red-500 text-red-900 focus:ring-2 focus:ring-red-200' 
                           : 'bg-[#FDF9FA] focus:bg-white border border-[#F5E1E4] text-[#6B3A44] focus:border-[#D98897]'
                       }`}
                     />
-                    {isPriceInvalid && (
+                    {showPriceError && (
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500">
                         <AlertCircle className="w-4 h-4" />
                       </span>
                     )}
                   </div>
-                  {isPriceInvalid && (
+                  {showPriceError && (
                     <p className="text-xs text-red-600 bg-red-50/70 border border-red-100 p-3 rounded-xl mt-1.5 font-bold flex items-center gap-1.5">
                       <AlertCircle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
                       Harga mustahil: Nilai minus atau nol dilarang oleh aturan Supabase Catalog.

@@ -16,7 +16,8 @@ import {
   Sparkles,
   TrendingUp,
   Award,
-  Coins
+  Coins,
+  Trash2
 } from 'lucide-react';
 import { Customer } from '../types';
 
@@ -24,10 +25,11 @@ interface CustomerDBViewProps {
   customers: Customer[];
   onAddCustomer: (customer: Customer) => void;
   onEditCustomer: (customer: Customer) => void;
+  onDeleteCustomer?: (customerId: string) => void;
   userRole?: string;
 }
 
-export default function CustomerDBView({ customers, onAddCustomer, onEditCustomer, userRole }: CustomerDBViewProps) {
+export default function CustomerDBView({ customers, onAddCustomer, onEditCustomer, onDeleteCustomer, userRole }: CustomerDBViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTier, setSelectedTier] = useState('All Tiers');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -396,6 +398,21 @@ export default function CustomerDBView({ customers, onAddCustomer, onEditCustome
                                 >
                                   Edit Pelanggan
                                 </button>
+                                {onDeleteCustomer && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveMenuCustomerId(null);
+                                      if (window.confirm(`Apakah Anda yakin ingin menghapus pelanggan "${customer.name}"?`)) {
+                                        onDeleteCustomer(customer.id);
+                                      }
+                                    }}
+                                    className="w-full px-4 py-2 text-xs font-bold text-[#C85C5C] hover:bg-red-50 hover:text-red-700 transition-colors flex items-center gap-2 cursor-pointer border-none text-left border-t border-[#F5E1E4]/50"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Hapus Pelanggan
+                                  </button>
+                                )}
                               </div>
                             </>
                           )}

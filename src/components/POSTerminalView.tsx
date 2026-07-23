@@ -878,7 +878,7 @@ export default function POSTerminalView({
 
       {/* RIGHT COLUMN: Cart Panel (Statis di desktop, Bottom Sheet di mobile) */}
       {!isMobile ? (
-        <div className="w-[380px] flex-shrink-0">
+        <div className="w-[380px] lg:w-[420px] flex-shrink-0">
           <CartPanel
             cart={cart}
             removeFromCart={removeFromCart}

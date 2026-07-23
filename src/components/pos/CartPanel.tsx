@@ -73,7 +73,7 @@ export default function CartPanel({
   };
 
   return (
-    <aside className="w-full lg:w-[420px] flex-shrink-0 flex flex-col h-full lg:h-[calc(100vh-140px)] bg-white border border-[#FFE4EC] rounded-2xl shadow-[0_8px_24px_rgba(247,71,123,0.08)] overflow-hidden font-sans">
+    <aside className="w-full flex-shrink-0 flex flex-col h-full lg:h-[calc(100vh-140px)] bg-white border border-[#FFE4EC] rounded-2xl shadow-[0_8px_24px_rgba(247,71,123,0.08)] overflow-hidden font-sans">
       
       {/* Customer Header Selector */}
       <div className="p-4 border-b border-[#FFE4EC] bg-white space-y-3">
@@ -119,7 +119,7 @@ export default function CartPanel({
                 </p>
               </div>
               <div className="text-right flex flex-col items-end flex-shrink-0 ml-2">
-                <span className="text-xs font-bold text-[#C0365A] font-mono">
+                <span className="text-xs font-bold text-[#C0365A] font-mono whitespace-nowrap">
                   Rp {(item.treatment.harga_jual * item.quantity).toLocaleString('id-ID')}
                 </span>
                 <button
@@ -148,21 +148,27 @@ export default function CartPanel({
 
       {/* Pricing Summary */}
       <div className="p-4 bg-[#FFF7FA] border-t border-[#FFE4EC] space-y-2 text-xs font-semibold">
-        <div className="flex justify-between items-center">
-          <span className="text-gray-400 font-normal">Subtotal</span>
-          <span className="font-bold font-mono text-gray-700">Rp {subtotal.toLocaleString('id-ID')}</span>
+        <div className="flex justify-between items-center gap-2">
+          <span className="text-gray-400 font-normal truncate">Subtotal</span>
+          <span className="font-bold font-mono text-gray-700 whitespace-nowrap text-right flex-shrink-0">
+            Rp {subtotal.toLocaleString('id-ID')}
+          </span>
         </div>
         {discountAmount > 0 && activeDiscount && (
-          <div className="flex justify-between items-center text-green-600">
-            <span className="font-normal">
+          <div className="flex justify-between items-center text-green-600 gap-2">
+            <span className="font-normal truncate">
               Diskon ({activeDiscount.nama})
             </span>
-            <span className="font-bold font-mono">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+            <span className="font-bold font-mono whitespace-nowrap text-right flex-shrink-0">
+              - Rp {discountAmount.toLocaleString('id-ID')}
+            </span>
           </div>
         )}
-        <div className="pt-2.5 border-t border-[#FFE4EC] flex justify-between items-center">
-          <span className="text-sm font-extrabold text-[#C0365A]">Grand Total</span>
-          <span className="text-sm font-extrabold text-[#C0365A] font-mono">Rp {grandTotal.toLocaleString('id-ID')}</span>
+        <div className="pt-2.5 border-t border-[#FFE4EC] flex justify-between items-center gap-2">
+          <span className="text-sm font-extrabold text-[#C0365A] truncate">Grand Total</span>
+          <span className="text-sm font-extrabold text-[#C0365A] font-mono whitespace-nowrap text-right flex-shrink-0">
+            Rp {grandTotal.toLocaleString('id-ID')}
+          </span>
         </div>
       </div>
 

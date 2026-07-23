@@ -522,6 +522,25 @@ async function doFlushMutationQueue() {
           text: async () => JSON.stringify(error || data)
         };
 
+      } else if (mut.type === 'DELETE_CUSTOMER') {
+        console.log('[DELETE_CUSTOMER] ID:', mut.payload.id);
+
+        const query = supabase
+          .from('customers')
+          .delete()
+          .eq('id', mut.payload.id);
+        query.headers['X-Correlation-Id'] = mut.correlationId || 'NO_CORRELATION';
+        const { error, status } = await query;
+
+        console.log('[DELETE_CUSTOMER] Respons Supabase:', JSON.stringify({ error, status }));
+
+        response = {
+          ok: !error,
+          status: status,
+          json: async () => error ? error : { message: 'Deleted' },
+          text: async () => JSON.stringify(error || { message: 'Deleted' })
+        };
+
       } else if (mut.type === 'CREATE_SERVICE') {
         const query = supabase
           .from('services')
