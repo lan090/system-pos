@@ -11,3 +11,6 @@ coverage/
 
 .vercel
 scratch/
+test-results/
+playwright-report/
+supabase/.temp/
