@@ -22,7 +22,10 @@ import {
   LayoutDashboard,
   Bookmark,
   LogOut,
-  Settings
+  Settings,
+  Download,
+  Smartphone,
+  MonitorPlay
 } from 'lucide-react';
 
 import Sidebar from './components/Sidebar';
@@ -41,6 +44,7 @@ const UserManagementView = lazy(() => import('./components/UserManagementView'))
 const QueueInspector = lazy(() => import('./components/QueueInspector'));
 
 import { useAuth } from './hooks/useAuth';
+import { usePWAInstall } from './hooks/usePWAInstall';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDashboardData } from './hooks/useDashboardData';
 import {
@@ -111,6 +115,7 @@ export default function App() {
   const checkActualConnectivity = (): boolean => navigator.onLine;
 
   const { isLoggedIn, isCheckingAuth, currentUser: authUser, handleLogin, handleLogout: authLogout } = useAuth(checkActualConnectivity);
+  const { isInstallable, installed, showIOSPrompt, installApp } = usePWAInstall();
   const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState('pos');
   const [discounts, setDiscounts] = useState<Discount[]>([]);
@@ -983,6 +988,66 @@ export default function App() {
   };
 
 
+  const handleDeleteCustomer = async (id: string) => {
+    // Check if there are any appointments in local cache for this customer
+    const hasLocalAppointments = appointments.some(app => app.customer_id === id);
+    if (hasLocalAppointments) {
+      alert("Gagal menghapus pelanggan: Pelanggan ini memiliki reservasi/janji temu aktif.");
+      return;
+    }
+
+    try {
+      const db = await openSecureDB();
+
+      // 1. Remove any pending CREATE_CUSTOMER or UPDATE_CUSTOMER mutations from OFFLINE_MUTATION_QUEUE
+      // since the customer is being deleted, we cancel any unsynced creation/update.
+      const queueTx = db.transaction('OFFLINE_MUTATION_QUEUE', 'readwrite');
+      const queueStore = queueTx.objectStore('OFFLINE_MUTATION_QUEUE');
+      const pendingMutation = await queueStore.get(id);
+      if (pendingMutation && (pendingMutation.type === 'CREATE_CUSTOMER' || pendingMutation.type === 'UPDATE_CUSTOMER')) {
+        await queueStore.delete(id);
+        console.log(`Cancelled pending customer mutation in queue for ID: ${id}`);
+      }
+      await queueTx.done;
+
+      // 2. Delete customer from local cache
+      const cacheTx = db.transaction('LOCAL_CUSTOMER_CACHE', 'readwrite');
+      await cacheTx.objectStore('LOCAL_CUSTOMER_CACHE').delete(id);
+      await cacheTx.done;
+
+      // Update state
+      setCustomers(prev => prev.filter(c => c.id !== id));
+      setNotifications(prev => [`Pelanggan berhasil dihapus.`, ...prev]);
+      setNotificationsCount(n => n + 1);
+
+      // 3. Process remote deletion or queue it
+      if (isOnline) {
+        const { supabase } = await import('./lib/supabaseClient');
+        const { error } = await supabase.from('customers').delete().eq('id', id);
+        if (error) {
+          console.error("Failed to delete customer on Supabase:", error);
+          if (error.code === '23503') {
+            alert("Gagal menghapus pelanggan: Pelanggan ini memiliki riwayat transaksi atau reservasi.");
+          } else {
+            alert(`Gagal menghapus pelanggan: ${error.message || 'Terjadi kesalahan sistem.'}`);
+          }
+          // Restore customer to local cache and state since server rejected the delete
+          await fetchCustomers();
+          return;
+        }
+      } else {
+        // If offline, we queue the DELETE_CUSTOMER mutation
+        await safeAddToQueue({ type: 'DELETE_CUSTOMER', payload: { id } });
+      }
+
+      await loadQueueCounts();
+    } catch (err) {
+      console.error("Failed to delete customer:", err);
+    }
+  };
+
+
+
   const updateAppointmentStatus = async (app: Appointment, newStatus: 'Scheduled' | 'In Progress' | 'Done' | 'Cancelled') => {
     const updatedApp = { ...app, status: newStatus };
     const dbPayload = {
@@ -1466,6 +1531,7 @@ export default function App() {
                 customers={customers} 
                 onAddCustomer={handleAddCustomer} 
                 onEditCustomer={handleEditCustomer}
+                onDeleteCustomer={handleDeleteCustomer}
                 userRole={userRole}
               />
             </Suspense>
@@ -1596,6 +1662,78 @@ export default function App() {
                   </div>
                 </div>
 
+              </div>
+
+              {/* Kartu Integrasi PWA */}
+              <div className="bg-white border border-[#F2C6CE] rounded-xl p-6 shadow-sm space-y-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#FFF0F5] flex items-center justify-center border border-[#FFE4EC]">
+                    <Download className="w-4 h-4 text-[#F7477B]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-[#6B3A44]">Aplikasi Native Desktop &amp; Mobile (PWA)</h3>
+                    <p className="text-[11px] font-medium text-[#857375] mt-0.5">Jalankan AuraDesk langsung dari layar utama untuk kemudahan akses offline.</p>
+                  </div>
+                </div>
+
+                {installed ? (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-bold text-green-800">Aplikasi Terpasang (Standalone Mode)</h4>
+                      <p className="text-xs font-normal text-green-700 mt-1 leading-relaxed">
+                        AuraDesk saat ini berjalan sebagai aplikasi native terinstal. Anda mendapatkan performa optimal dan perlindungan sinkronisasi data offline terbaik.
+                      </p>
+                    </div>
+                  </div>
+                ) : isInstallable ? (
+                  <div className="border border-[#F2C6CE] bg-[#FFF7FA] rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-bold text-[#C0365A]">Aplikasi Siap Diunduh</h4>
+                      <p className="text-xs font-normal text-on-surface-variant leading-relaxed max-w-lg">
+                        Unduh AuraDesk untuk mendapatkan shortcut di desktop komputer atau handphone Anda. Nikmati transisi layar lebih cepat dan keandalan data 100% offline.
+                      </p>
+                    </div>
+                    <button 
+                      onClick={installApp}
+                      className="bg-[#F7477B] text-white hover:bg-[#C0365A] font-bold text-xs px-5 py-3 rounded-xl transition-all shadow-[0_4px_14px_rgba(247,71,123,0.20)] hover:shadow-[0_6px_20px_rgba(247,71,123,0.30)] flex items-center gap-2 cursor-pointer flex-shrink-0 self-stretch sm:self-auto justify-center"
+                    >
+                      <Download className="w-4 h-4" />
+                      Pasang Aplikasi
+                    </button>
+                  </div>
+                ) : showIOSPrompt ? (
+                  <div className="border border-[#F2C6CE] bg-[#FFF7FA] rounded-xl p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-[#F7477B]" />
+                      <h4 className="text-xs font-bold text-[#C0365A]">Petunjuk Instalasi untuk iOS Safari (iPhone / iPad)</h4>
+                    </div>
+                    <p className="text-xs font-normal text-on-surface-variant leading-relaxed">
+                      Browser iOS Safari tidak mendukung unduhan otomatis sekali klik. Silakan ikuti langkah manual berikut untuk memasang AuraDesk:
+                    </p>
+                    <ol className="text-xs font-normal text-on-surface-variant space-y-2 pl-4 list-decimal leading-relaxed">
+                      <li>
+                        Ketuk tombol <strong>Bagikan (Share)</strong> <span className="bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 text-[10px] font-mono">📥</span> atau <span className="bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 text-[10px] font-mono">⎋</span> di bar bawah Safari Anda.
+                      </li>
+                      <li>
+                        Gulir menu bagikan ke bawah, pilih opsi <strong>"Tambahkan ke Layar Utama" (Add to Home Screen)</strong> <span className="bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 text-[10px] font-mono">＋</span>.
+                      </li>
+                      <li>
+                        Ketuk tombol <strong>"Tambah" (Add)</strong> di sudut kanan atas layar untuk mengonfirmasi.
+                      </li>
+                    </ol>
+                  </div>
+                ) : (
+                  <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4 flex items-start gap-3">
+                    <Info className="w-5 h-5 text-zinc-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-bold text-zinc-700">PWA Didukung oleh Browser Anda</h4>
+                      <p className="text-xs font-normal text-zinc-600 mt-1 leading-relaxed">
+                        Aplikasi PWA dapat berjalan optimal di browser modern seperti Google Chrome, Microsoft Edge, Safari, dan Opera. Pastikan Anda menggunakan salah satu browser tersebut untuk memasang AuraDesk sebagai aplikasi standalone.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Detailed IndexedDB Queue Inspector Dashboard */}
